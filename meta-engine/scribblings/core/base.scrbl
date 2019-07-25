@@ -1,11 +1,11 @@
 #lang scribble/manual
-@require[@for-label[meta-engine/engine/core
-                    racket/base]]
+@require[@for-label[racket/base]]
 
 @title{core/base}
 @author{thoughtstem}
 
-@defmodule[meta-engine/engine/core/main]
+@defmodule[meta-engine]
+
 @section{Basic Data Structures}
 
 @defproc[(game [entity entity?] ...)
@@ -22,7 +22,7 @@ Other than games and entities, the other basic building block is the component. 
 
 @defform[(define-component name contract)]{
   Creates a new kind of component named @racket[name], whose values will always match the type described by the contract @racket[contract].  
-  Creating a component causes a bunch of useful functions to bedefined for you.
+  Creating a component causes a bunch of useful functions to be defined for you.
 
   The most obvious one is the constructor, which we shall show in context below.
 
@@ -40,7 +40,7 @@ Other than games and entities, the other basic building block is the component. 
 
   Above, the initial value of health is @racket[100]; the description of change is @racket[(- (get-health) 1)].  Together, these describe a health component whose value decreases with each tick.
 
-  It also introduces one of the other things you get for free with @racket[define-component], which is a getter: @racket[get-health].  This getter, when used without arguments, gets the current health value of the entity to which the component is attached.
+  It also introduces one of the other things you get for free with @racket[define-component], which is a getter (e.g.: @racket[get-health]).  This getter, when used without arguments, gets the current health value of the entity to which the component is attached.
 
   Note that this getter can be used from other components, too.  For example:
 
@@ -60,32 +60,35 @@ Other than games and entities, the other basic building block is the component. 
 
   Here the @racket[death] component uses @racket[(get-health)] to check when the @racket[health] component has reached 0.  These getters are the primary way of getting data to flow between components.  (What happens if there are two @racket[health] components on the entity?  Don't do that; it's an error.  Components must have unique names.) 
 
-  A quick note, there's one case where you don't have to use a getter, and can take advantage of a shorter syntax.  The @racket[health] component could have been implemented as:
+  A quick note, there's one case where you don't have to use a getter, and can take advantage of a shorter syntax.  The @racket[health] component could have been implemented above as:
 
 @codeblock{
-  (health 100 (lift sub1)) 
+  (define hero-health (health 100
+                              (lift sub1)))
 } 
 
 Or, using the alias @racket[^], even shorter:
 
 @codeblock{
-  (health 100 (^ sub1)) 
+  (define hero-health (health 100
+                              (^ sub1))) 
 } 
 
 These mean, apply the given function to the value stored in the component.  
 But be careful, it's not this simple:
 
 @codeblock{
-  (health 100 sub1) 
+    (define hero-health (health 100
+                                sub1)) 
 } 
 
 That is syntactically valid, but would mean that on every tick you want to replace the value in the component with the function reference @racket[sub1].  I'm not sure why you'd want to do that, but there are reasons you might want to store functions in components, so that ability is there.  Because that ability is there, you need to lift functions if you want to apply them, rather than store them.
 
 Note: there are two special values that, if stored in a component, have a special meaning in the runtime.
 
-One is @racket[spawn], which is a struct that stores an entity.  On any tick that this value appears in a component, the runtime will spawn that entiti.
+* One is @racket[spawn], which is a struct that stores an entity.  On any tick that this value appears in a component, the runtime will spawn that entity.
 
-The other is @racket[despawn], which is a struct with no fields.  On any tick that this value appears in a component, the runtime will destroy the entiti to which that component is attached.
+* The other is @racket[despawn], which is a struct with no fields.  On any tick that this value appears in a component, the runtime will destroy the entity to which that component is attached.
 } 
 
 Now that we've defined games, entities, and components, we can talk about the runtime model.  Note that you have access to all functions that advance the state of games, entities, and components.  

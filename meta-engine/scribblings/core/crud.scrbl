@@ -1,6 +1,5 @@
 #lang scribble/manual
-@require[@for-label[meta-engine/engine/core
-                    racket/base]]
+@require[@for-label[racket/base]]
 
 @title{crud}
 @author{thoughtstem}
@@ -21,7 +20,7 @@ When you are writing your game logic, you will mostly be defining components (or
          (or/c #f component?)]{
   Read.
 
-  Finds and returns the first component on the entity where @racket[pred?] is true.
+  Finds and returns the first component on the entity where @racket[query?] is true.
 }
 
 @defproc[(update-component [entity entity?]
@@ -70,7 +69,7 @@ With entities, the CRUD model is similar.
          game?]{
   Update.
 
-  Finds and updates an old entity. See @racket[update-componet]; this function has the same flexibility of types when it comes to @racket[old] and @racket[new].
+  Finds and updates an old entity. See @racket[update-component]; this function has the same flexibility of types when it comes to @racket[old] and @racket[new].
 
 }
 

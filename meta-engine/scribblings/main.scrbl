@@ -5,3 +5,5 @@
 
 @title{meta-engine v2}
 @author{thoughtstem}
+
+@(include-section "core/main.scrbl")

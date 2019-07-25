@@ -1,5 +1,4 @@
 #lang info
-(define collection 'multi)
 
 (define scribblings '(("scribblings/main.scrbl" (multi-page))))
 

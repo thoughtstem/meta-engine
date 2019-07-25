@@ -1,6 +1,5 @@
 #lang scribble/manual
-@require[@for-label[meta-engine/engine/core
-                    racket/base]]
+@require[@for-label[racket/base]]
 
 @title{runtime}
 @author{thoughtstem}
