@@ -3,6 +3,9 @@
 (provide add-component
          add-components
 
+         add-or-replace-components
+         replace-component
+
          get
          get-component
          get-components
@@ -18,6 +21,10 @@
 
          ;Query language
          has-component
+
+
+         ;Move to base?
+         get-component-name
          )
 
 (require "./base.rkt"
@@ -47,6 +54,7 @@
     e
     (apply add-components (add-component e (first cs)) 
            (rest cs))))
+
 
 (define/contract (update-component e old-c new-c)
 
@@ -83,13 +91,17 @@
   (define real-new-c 
     (action real-old-c))
 
+
   (if (equal? real-new-c real-old-c) 
     e
     (begin 
       ;Is the list-set here slow???
       ; An entity's components should definitely be a vector (or a hash!), since we never add/remove at runtime.  Then the component list can just 
-      (set-entity-components! e (list-set cs i real-new-c))
+
+      (set! e (set-entity-components! e 
+                                      (list-set cs i real-new-c)))
       (set-entity-changed?! e #t)
+
 
       e)
     )
@@ -272,5 +284,26 @@
       component-name)))
 
 
+(define (replace-component e c)
+  (update-component e
+                    (lambda (other-c) 
+                      (eq?
+                        (get-component-name other-c)
+                        (get-component-name c)))
+                    c))
 
+
+(define (add-or-replace-components e cs)
+  (define fcs (flatten cs)) 
+
+  (define (add-or-replace c e)
+    (if (has-component e (get-component-name c))
+      (replace-component e c)
+      (add-component e c)))
+
+  (foldl add-or-replace e fcs))
+
+
+(define (get-component-name c)
+  (vector-ref c 1))
 

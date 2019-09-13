@@ -86,6 +86,8 @@
     names))
 
 (define (get-value c)
+  (when (not c)
+    (error "Component was #f"))
   (vector-ref c 5))
 
 

@@ -6,7 +6,9 @@
          CURRENT-COMPONENT)
 
 (require "./base.rkt"
-         "./crud.rkt")
+         "./crud.rkt"
+         "./printer.rkt"
+         )
 
 (require (for-syntax racket))
 (require (for-syntax racket/syntax))
@@ -20,8 +22,7 @@
                    (COMPONENT? (format-id #'COMPONENT "~a?" #'COMPONENT)) 
                    (COMPONENT=? (format-id #'COMPONENT "~a=?" #'COMPONENT)) 
                    (get-COMPONENT (format-id #'COMPONENT "get-~a" #'COMPONENT)) 
-                   (set-COMPONENT (format-id #'COMPONENT "set-~a" #'COMPONENT)) 
-                   ]
+                   (set-COMPONENT (format-id #'COMPONENT "set-~a" #'COMPONENT))]
        (quasisyntax/loc stx (begin
                               (define (COMPONENT? x) 
                                 (and (vector? x)
@@ -51,9 +52,12 @@
                                     (get-component (CURRENT-ENTITY) 
                                                    'COMPONENT)))
 
+
                                 (if (not real-c)
                                   (if (void? fail)
-                                    (error (~a "No component " 'COMPONENT " found"))
+                                    (begin 
+                                      (displayln c)
+                                      (error (~a "No component " 'COMPONENT " found")))
                                     fail)
                                   (vector-ref
                                     real-c 

@@ -10,7 +10,10 @@
     "sound/main.rkt"
     "input/main.rkt"
     "meta-games/main.rkt"
-    "rendering/main.rkt"))
+    "rendering/main.rkt"
+    "sprites/main.rkt"
+    "animations/main.rkt"
+    "scene-graph/main.rkt"))
 
 
 (require
@@ -22,4 +25,7 @@
   "sound/main.rkt"
   "input/main.rkt"
   "meta-games/main.rkt"
-  "rendering/main.rkt" )
+  "rendering/main.rkt" 
+  "sprites/main.rkt"
+  "animations/main.rkt"
+  "scene-graph/main.rkt")
