@@ -37,6 +37,10 @@
   (parameterize ([profiler-on #t])
     exp))
 
+
+#;
+(define (tick g) g)
+
 (define/contract (tick g)
   (maybe-contract
     (-> game? game?))
@@ -51,14 +55,20 @@
  
   (if (mutable-state)
     (set! next-g g)
-    (set! next-g (struct-copy game g)))
+    (set! next-g 
+      (game (game-entities g))
+      #;
+      (struct-copy game g)))
 
   (set! next-g (tick-entities next-g)) 
   (set! next-g (handle-removals next-g))
   (set! next-g (handle-spawns next-g))
 
+  ;(displayln count)
   next-g)
 
+#;
+(define count 0)
 
 (define (tick-entities g)
   (for ([e (game-entities g)]
@@ -73,16 +83,22 @@
     ;Tick the components
       (parameterize ([CURRENT-ENTITY next-e]
                      [CURRENT-GAME g])
-        (for ([c (entity-components e)]
+        (for ([c (entity-dynamic-components e)]
               [ci (in-naturals)])
           (debug:component-tick-begin c)
 
-          (define h (component-update c))
+          (define h 
+            (component-update c))
 
           (when h
             (define component-start-time (current-inexact-milliseconds))
 
-            (define new-c (h c))  
+            (define new-c 
+              (h c))  
+            #;
+            (set! count (add1 count))
+
+            ;Is this necessary?  COmmenting out seems to not break things...
             (update-component! e c new-c)
 
             (when (profiler-on)

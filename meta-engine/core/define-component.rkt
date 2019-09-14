@@ -93,6 +93,8 @@
                                                         c
                                                         (vector-copy c)))
 
+                                                    ;(displayln 'update)
+
                                                     (parameterize ([CURRENT-COMPONENT new-c])
                                                       (vector-set! new-c 5 update)) 
 

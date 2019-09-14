@@ -8,7 +8,8 @@
 		"mode-lambda"
 		"threading"
 		"https://github.com/thoughtstem/racket-chipmunk.git#fixes"
-                "base"))
+                "base"
+                "jack-ease"))
 (define build-deps '("draw-doc"
                      "racket-doc"
                      "scribble-lib"

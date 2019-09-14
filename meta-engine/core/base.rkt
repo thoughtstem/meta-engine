@@ -1,7 +1,8 @@
 #lang racket
 
 (provide 
-  game
+  (rename-out [make-game game])
+  game-entity-hash
   new-game
   game?
   game-entities
@@ -14,6 +15,7 @@
   new-entity
   entity?
   entity-components
+  entity-dynamic-components
   set-entity-components!
   set-entity-changed?!
   entity-changed?
@@ -74,8 +76,37 @@
     exp))
 
 ;Our basic struct types
-(struct entity (id component-hash component-names changed? ) #:mutable  #:transparent)
-(struct game (entities) #:mutable #:transparent)
+(struct entity (id component-hash component-names dynamic-components changed? ) #:mutable  #:transparent)
+(struct game (entities
+              entity-hash  
+               ) #:mutable #:transparent)
+
+(define (make-game . es)
+  (define fes (flatten es))
+  (define named-es
+    (filter 
+      (lambda (e)
+        (hash-ref  
+          (entity-component-hash e)
+          'name
+          #f))
+      fes))
+  
+  (define h
+    (apply hash
+           (flatten
+             (map 
+               (lambda (e)
+                 (list 
+                   (get-value
+                     (hash-ref
+                       (entity-component-hash e)
+                       'name))
+                   e))
+               named-es
+               ))))
+
+  (game fes h))
 
 (define (entity-components e)
   (define names (entity-component-names e))  
@@ -202,7 +233,8 @@
 (define/contract (new-game . es)
  (->* () #:rest (listof (or/c entity?
                               list?)) game?)
-  (game (map copy-entity (flatten es))))
+  (make-game 
+    (map copy-entity (flatten es))))
 
 (define/contract (new-entity . cs)
  (->* () #:rest (listof (or/c component?
@@ -214,6 +246,7 @@
    (entity (next-id) 
            (components->component-hash flat-cs)
            (map component-name flat-cs)
+           (filter component-update flat-cs)
            #f))
 )
 
@@ -222,6 +255,7 @@
    (entity (entity-id e) 
            (components->component-hash (flatten cs))
            (map component-name cs)
+           (filter component-update cs)
            #f)))
 
 (define (components->component-hash cs)

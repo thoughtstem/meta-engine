@@ -29,7 +29,7 @@
 
 (require "./base.rkt"
          "./debug.rkt"
-         "./printer.rkt")
+         "./printer.rkt" )
 
 
 ;COMPONENT CRUD
@@ -153,7 +153,9 @@
     (-> entity? any/c any/c))
 
   (if (symbol? query?)
-    (hash-ref (entity-component-hash e) query? #f) 
+    (begin
+    ;  (displayln (~a "get-component " query?))
+      (hash-ref (entity-component-hash e) query? #f)) 
     (let ([real-query?
             (if (component? query?)
               (curry component=? query?)
@@ -181,7 +183,8 @@
   i)
 
 
-(define/contract (get-entity g pred?-or-e)
+(define/contract 
+  (get-entity g pred?-or-e)
 
   (maybe-contract
     (-> game? (or/c entity? 
@@ -229,6 +232,9 @@
     (begin
       (set-game-entities! g new-es)
       g)
+    
+      (game new-es)
+      #;
       (struct-copy game g [entities new-es])))
 
 
@@ -251,8 +257,10 @@
     (begin
       (set-game-entities! g new-es) 
       g)
+    (game new-es)
+    #;
     (struct-copy game g
-                [entities new-es])))
+                 [entities new-es])))
 
 (define/contract (has-component e c?)
   (maybe-contract
@@ -264,19 +272,16 @@
            (findf c? (entity-components e))))))
 
 (define (get entity-name component-name)
+  ;(displayln (~a "get " entity-name " " component-name))
+
   (define entity-with-name
-    (get-entity (CURRENT-GAME) 
-                (lambda (e)
-                  (and
-                    ;A bit hacky, since name is defined outside of core.  TODO: Should rope that component into core if it has special meaning here.
-                    (has-component e 'name)
-                    (eq? entity-name 
-                         (get-value (get-component e 'name)))))))
+    (hash-ref (game-entity-hash (CURRENT-GAME))
+              entity-name
+              #f))
 
   (when (not entity-with-name)
     (pretty-print-game (CURRENT-GAME))
     (error (~a "No entity with name " entity-name " and component name " component-name)))
-
 
   (get-value
     (get-component 

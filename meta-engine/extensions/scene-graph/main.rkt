@@ -34,51 +34,56 @@
   (syntax-parse stx
     [(_ start change)
      #'(list
-         (local-size start change)
+         (local-size start 
+                     change)
          (size start
                (* (get-local-size)
-                  (get 'parent-data 'size))))]  
+                  (get-parent-size))))]
     [(_ start)
      #'(list
          (local-size start)
          (size start
                (* (get-local-size)
-                  (get 'parent-data 'size))))]))
+                  (get-parent-size))))]))
 
 (define-syntax (relative-rotation stx)
   (syntax-parse stx
     [(_ start change)
      #'(list
-         (local-rotation start change)
+         (local-rotation start 
+                         change)
          (rotation start
                    (+ (get-local-rotation)
-                      (get 'parent-data 'rotation))))]  
+                      (get-parent-rotation))))]
     [(_ start)
      #'(list
          (local-rotation start)
          (rotation start
                    (+ (get-local-rotation)
-                      (get 'parent-data 'rotation))))]))
+                      (get-parent-rotation))))]))
 
 (define-syntax (relative-position stx)
   (syntax-parse stx
     [(_ start change)
      #'(list
-         (local-position start change)
-         (position start (get-global-position))) 
+         (local-position start 
+                         change)
+         (position start 
+                   (get-global-position))) 
      ]
     [(_ start)
      #'(list
          (local-position start)
-         (position start (get-global-position)))]))
+         (position start 
+                   (get-global-position)))]))
 
 (define (get-global-position)
-  (posn-add (get 'parent-data 'position)   
+  (posn-add (get-parent-position)
             (posn-scale
               (get-size)
               (rotate-position-around
                 (get-local-position) 
-                (get 'parent-data 'rotation)))))   
+                (get-parent-rotation)))))
 
 
 (define (parent-data-entity start-pos 
@@ -124,20 +129,21 @@
     (^ (compose tick propagate-to-child-parent-data))))
 
 (define (propagate-to-child-parent-data g)
-  (define f 
-    (compose
-      (curryr update-entity 
-              (has-name 'parent-data)
-              (curryr set-size 
-                      (get-size)))
-      (curryr update-entity 
-              (has-name 'parent-data)
-              (curryr set-position 
-                      (get-position)))
-      (curryr update-entity
-              (has-name 'parent-data)
-              (curryr set-rotation 
-                      (get-rotation)))))     
+  (define (f g) 
+    (define pd 
+      (hash-ref (game-entity-hash g)
+                'parent-data))
+
+    (define new-pd
+      (set-rotation
+        (set-position
+          (set-size pd 
+                    (get-size))
+          (get-position))
+        (get-rotation)))
+    
+    (update-entity g pd new-pd))
+
   (f g))
 
 
