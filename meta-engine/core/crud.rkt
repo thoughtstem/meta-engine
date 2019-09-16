@@ -281,7 +281,6 @@
               #f))
 
   (when (not entity-with-name)
-    (pretty-print-game (CURRENT-GAME))
     (error (~a "No entity with name " entity-name " and component name " component-name)))
 
   (get-value

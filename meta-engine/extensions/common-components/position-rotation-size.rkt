@@ -4,6 +4,8 @@
   x
   y
 
+  to
+
   position
   set-position
   get-position
@@ -107,10 +109,14 @@
 (define-component destination posn?)
 
 (define (move-toward by p1 p2)
+  (define diff 
+    (posn-subtract p2 p1))
+
   (define dir
+   (if (zero? (posn-magnitude diff)) (posn 0 0)
     (posn-scale by
-      (posn-normalize
-        (posn-subtract p2 p1))))
+     (posn-normalize
+      diff))))
   
   (posn-add dir p1))
 
@@ -118,8 +124,22 @@
   (if (there-yet speed)
     (get-destination)
     (move-toward speed
-      (get-position)
+      (get-value (CURRENT-COMPONENT))
       (get-destination))))
+
+
+(define (to target #:by (by 0.1))
+  (define curr 
+   (get-value (CURRENT-COMPONENT)))
+
+  (define diff (- target curr))
+
+  (define dir (if (positive? diff) 1 -1)) 
+
+  (if (< (abs diff) (abs by))
+      target
+      (+ (* by dir) 
+         curr)))
 
 
 

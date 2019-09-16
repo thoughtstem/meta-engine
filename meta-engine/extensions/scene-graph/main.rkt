@@ -12,6 +12,7 @@
          get-local-position
          get-parent-position
 
+         local-size
          relative-rotation
          relative-position
          relative-size
@@ -79,12 +80,10 @@
                    (get-global-position)))]))
 
 (define (get-global-position)
-  (posn-add (get-parent-position)
-            (posn-scale
-              (get-size)
-              (rotate-position-around
-                (get-local-position) 
-                (get-parent-rotation)))))
+   (posn-add (get-parent-position)
+    (rotate-position-around
+     (posn-scale (get-size) (get-local-position))
+     (get-parent-rotation))))
 
 
 (define (parent-data-entity start-pos 
@@ -111,15 +110,18 @@
   new-posn)
 
 (define (get-parent-rotation)
-  (get 'parent-data 'rotation))
+  (with-handlers ([exn:fail? (thunk* 0)])
+   (get 'parent-data 'rotation)))
 
 (define (get-parent-position)
-  (get 'parent-data 'position))
+  (with-handlers ([exn:fail? (thunk* (posn 0 0))])
+   (get 'parent-data 'position)))
 
 (define (get-parent-size)
-  (get 'parent-data 'size))
+  (with-handlers ([exn:fail? (thunk* 1)])
+   (get 'parent-data 'size)))
 
-(define (children . es)
+(define (children #:tick (t tick) . es)
   (also-render
     (game 
       (parent-data-entity
@@ -127,7 +129,7 @@
         (rotation 0)
         (size 1))
       es)
-    (^ (compose tick propagate-to-child-parent-data))))
+    (^ (compose t propagate-to-child-parent-data))))
 
 (define (propagate-to-child-parent-data g)
   (define (f g) 
