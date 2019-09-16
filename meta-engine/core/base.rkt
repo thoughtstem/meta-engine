@@ -199,12 +199,12 @@
   (eq? (component-id c1)
        (component-id c2)))
 
-(define/contract (entity=? e1 e2)
-  (maybe-contract
-    (-> entity? entity? boolean?))
-
+(define (entity=? e1 e2)
+ (and 
+  (entity? e1)
+  (entity? e2)
   (eq? (entity-id e1)
-       (entity-id e2)))
+   (entity-id e2))))
 
 
 

@@ -18,6 +18,7 @@
 
          get-global-position
          
+         parent
          children)
 
 (require "../../core/main.rkt")
@@ -147,4 +148,11 @@
   (f g))
 
 
+(define (parent . cs)
+ (add-or-replace-components
+  (entity
+   (relative-rotation 0) 
+   (relative-size 1) 
+   (relative-position (posn 0 0))) 
+  cs))
 

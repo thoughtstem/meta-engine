@@ -116,7 +116,7 @@
 
 (define (move-to-destination speed)
   (if (there-yet speed)
-    (get-position)
+    (get-destination)
     (move-toward speed
       (get-position)
       (get-destination))))

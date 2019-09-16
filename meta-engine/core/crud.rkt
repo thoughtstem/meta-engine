@@ -251,6 +251,7 @@
 
   (define to-remove (findf p es))
 
+
   (define new-es (remove to-remove es entity=?))
 
   (if (mutable-state)

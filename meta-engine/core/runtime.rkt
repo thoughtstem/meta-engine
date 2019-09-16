@@ -24,7 +24,6 @@
 
 
 
-(define to-remove '())
 (define to-spawn  '())
 
 (define (tick! g)
@@ -61,7 +60,6 @@
       (struct-copy game g)))
 
   (set! next-g (tick-entities next-g)) 
-  (set! next-g (handle-removals next-g))
   (set! next-g (handle-spawns next-g))
 
   ;(displayln count)
@@ -113,38 +111,28 @@
             (define v (get-value new-c)) 
 
             (when (despawn? v)
-              (set! to-remove (cons next-e to-remove))
-              (debug:added-to-remove-queue to-remove))
+              (set! next-e (new-entity)))
 
             (when (spawn? v)
               (set! to-spawn (cons (spawn-entity v) to-spawn))
               (debug:added-to-spawn-queue to-spawn) )
             
-            (debug:component-tick-end new-c)  
-            ) 
+            (debug:component-tick-end new-c)) 
 
           ))
-    
 
+       (set-game-entities! g
+                           (list-set (game-entities g) ei next-e))
+      ) 
 
-      (when (not (mutable-state))
-        (set-game-entities! g
-                            (list-set (game-entities g) ei next-e)))) 
-
+  (set-game-entities! g (filter-not empty-entity? (game-entities g)))
 
   (debug:all-entities-ticked g)
+
   g)
 
-(define (handle-removals g)
-
-  (for ([r to-remove])
-    (set! g (remove-entity g r)))
-
-  (when (not (empty? to-remove))
-    (debug:after-removals g to-remove))
-
-  (set! to-remove '())
-  g)
+(define (empty-entity? e)
+  (= 0 (length (entity-components e))))
 
 (define (handle-spawns g)
 

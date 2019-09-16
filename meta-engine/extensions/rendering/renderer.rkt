@@ -1,6 +1,8 @@
 #lang racket
 
-(provide play play!)
+(provide play play!
+         CURRENT-WIDTH CURRENT-HEIGHT
+         center-posn)
 
 (require racket/match
          racket/fixnum
@@ -27,6 +29,11 @@
     #\d #f
     #\w #f
     #\s #f))
+
+
+(define (center-posn)
+  (posn (/ CURRENT-WIDTH 2) (/ CURRENT-HEIGHT 2)))
+
 
 (struct game+render ;TODO: CHANGE THIS NAME
   ( state render-tick)
@@ -101,6 +108,8 @@
 
 (define recompiled #f)
 (define csd #f)
+(define CURRENT-WIDTH 400)
+(define CURRENT-HEIGHT 400)
 
 (define (init-db)
   (define sd  (ml:make-sprite-db))
@@ -116,12 +125,17 @@
   (set! csd (ml:compile-sprite-db sd))
   csd)
 
-(define (play! g)
-  (mutable! (play g)))
+(define (play! #:width (W 400) 
+               #:height (H 400)
+               g)
+  (mutable! (play #:width W #:height H g)))
 
-(define (play g)
-  (define W 400)
-  (define H 400)
+(define (play #:width (W 400) 
+              #:height (H 400)
+              g)
+
+  (set! CURRENT-WIDTH W)
+  (set! CURRENT-HEIGHT H)
 
   (define render-tick (get-mode-lambda-render-tick W H))
 
