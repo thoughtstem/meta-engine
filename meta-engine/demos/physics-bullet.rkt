@@ -23,7 +23,7 @@
 (define (bullet)
   (entity
    (physics-system #:mass 10
-                   #:forces (thunk* (posn 10000 0))
+                   #:forces (thunk* (posn 1000 0))
                    20 20)
    (position (posn 10 200)
              (get-physics-position))
@@ -41,7 +41,8 @@
             (rectangle 400 10 'solid 'white)))))
 
 (define g
- (game 
+ (game
+  (delta-time-entity)
   (physics-manager)
   (bullet)
   (wall 200 10)

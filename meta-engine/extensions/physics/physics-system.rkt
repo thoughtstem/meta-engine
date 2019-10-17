@@ -5,9 +5,17 @@
 
   get-physics-position
   get-physics-rotation
+  
+  set-physics-position
+  
   get-velocity
   physics-manager
-  (rename-out [make-physics-system physics-system]))
+  (rename-out [make-physics-system physics-system])
+  
+  get-physics-system
+  get-chipmunk
+  chipmunk-posn
+  )
 
 (require "../../core/main.rkt" 
          "../common-components/main.rkt"
@@ -222,8 +230,6 @@
   (chip:cpShapeSetUserData shape e-pointer)
 
   body)
-
-
                                                      
 
 (define (chipmunk-x c)
@@ -269,23 +275,24 @@
   (chip:cpBodyGetAngle c))
 
 (define (get-physics-position)
-  (define p 
-     (get-physics-system))
-
-  (define c
-    (get-chipmunk p))
-
+  (define p (get-physics-system (CURRENT-ENTITY) #f))
+  (define c (and p (get-chipmunk p)))
   (if c 
       (chipmunk-posn c)
       (get-position)))
 
+(define (set-physics-position pos)
+  (define p (get-physics-system (CURRENT-ENTITY) #f))
+  (define c (and p (get-chipmunk p)))
+  (if c 
+      (begin (chip:cpBodySetPosition c 
+                                     (chip:cpv (posn-x pos) (posn-y pos)))
+             (chipmunk-posn c))
+      pos))
+
 (define (get-physics-rotation)
-  (define p 
-     (get-physics-system))
-
-  (define c
-    (get-chipmunk p))
-
+  (define p (get-physics-system (CURRENT-ENTITY) #f))
+  (define c (and p (get-chipmunk p)))
   (if c 
       (chipmunk-rotation c)
       (get-rotation)))
@@ -340,9 +347,12 @@
                        ret))
     (physics-world space
                    (begin
+                     ;(displayln (get-game-delta-time))
                      (chip:cpSpaceStep (get-physics-world) 
-                                       (/ 1 120.0))
-                     space)) 
+                                       ;(/ 1 30.0)
+                                       (min (real->double-flonum (get-game-delta-time)) (/ 1 30.0))
+                                       )
+                     space))
     ))
 
 
