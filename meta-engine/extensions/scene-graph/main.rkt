@@ -20,7 +20,8 @@
          get-global-position
          
          parent
-         children)
+         children
+         propagate-to-child-parent-data)
 
 (require "../../core/main.rkt")
 (require "../common-components/name.rkt")
