@@ -26,6 +26,11 @@
   get-size
   size?
 
+  size-xy
+  set-size-xy
+  get-size-xy
+  size-xy?
+
   move-to
  
   posn-map
@@ -45,7 +50,10 @@
 
 (define-component position posn?)
 (define-component rotation number?)
-(define-component size number?)                                         
+(define-component size number?)
+
+(define-component size-xy posn?)
+
 (define (posn-map f p)
   (posn (f (posn-x p))
         (f (posn-y p))))

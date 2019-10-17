@@ -218,6 +218,8 @@
       (define mls
         (ml:sprite #:layer (call-if-proc (get-layer e 0))
                    #:m (real->double-flonum (call-if-proc (get-size e 1)))
+                   #:mx (real->double-flonum (posn-x (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1))))))
+                   #:my (real->double-flonum (posn-y (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1))))))
                    #:theta (real->double-flonum (call-if-proc (get-rotation e 0)))
                    #:a (real->double-flonum (call-if-proc (get-transparency e 1))) 
                    (real->double-flonum (posn-x p))
