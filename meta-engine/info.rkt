@@ -7,7 +7,7 @@
 		"lux"
 		"mode-lambda"
 		"threading"
-		"https://github.com/thoughtstem/racket-chipmunk.git#fixes"
+		"https://github.com/thoughtstem/racket-chipmunk.git"
                 "base"
                 "jack-ease"))
 (define build-deps '("draw-doc"
