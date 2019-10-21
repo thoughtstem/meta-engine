@@ -200,7 +200,7 @@
   (for ([e (game-entities g)])
     (define s (get-component e 'sprite))
 
-    (when s 
+    (when (and s (get-value s))
       (define eid (entity-id e))
 
       (when new-sprites-added 

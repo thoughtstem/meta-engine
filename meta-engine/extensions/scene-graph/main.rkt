@@ -18,7 +18,8 @@
          relative-size
 
          get-global-position
-         
+
+         propagate-to-child-parent-data         
          parent
          children)
 

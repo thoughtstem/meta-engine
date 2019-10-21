@@ -130,16 +130,33 @@
 
 (define (to target #:by (by 0.1))
   (define curr 
-   (get-value (CURRENT-COMPONENT)))
+    (get-value (CURRENT-COMPONENT)))
+  (cond 
+    [(number? target) 
+     (to-num curr target #:by by)]
+    [(posn? target) 
+     (to-posn curr target #:by by)]))
+
+
+(define (to-posn curr target #:by (by 0.1))
+
+  (define diff (posn-subtract target curr))
+
+  (if (< (posn-magnitude diff) (abs by))
+    target
+    (let ([dir (posn-normalize diff)])
+      (posn-add (posn-scale by dir) curr))))
+
+
+(define (to-num curr target #:by (by 0.1))
+  
 
   (define diff (- target curr))
 
   (define dir (if (positive? diff) 1 -1)) 
 
   (if (< (abs diff) (abs by))
-      target
-      (+ (* by dir) 
-         curr)))
-
-
+    target
+    (+ (* by dir) 
+       curr)))
 
