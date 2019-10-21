@@ -28,7 +28,9 @@
     #\a #f
     #\d #f
     #\w #f
-    #\s #f))
+    #\s #f
+
+    #\space #f))
 
 
 (define (center-posn)
