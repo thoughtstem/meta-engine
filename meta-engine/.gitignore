@@ -1,0 +1,7 @@
+compiled/*
+**/compiled/*
+*/compiled/*
+*~
+.DS_Store
+*.bak
+doc/*
