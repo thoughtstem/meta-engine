@@ -51,7 +51,14 @@
 
    (define (word-event w e)
      (cond
-
+       [(or (eq? e 'close)
+            (and (key-event? e)
+                 (eq? (send e get-key-code) 'escape)))
+        (begin
+          (display-performance-stats)
+          #f)
+        ]
+       
        [(and (key-event? e)
              (eq? 'press 
                   (send e get-key-release-code))
@@ -78,13 +85,7 @@
 
           w)]
 
-       [(or (eq? e 'close)
-            (and (key-event? e)
-                 (eq? (send e get-key-code) 'escape)))
-        (begin
-          (display-performance-stats)
-          #f)
-        ]
+       
        [else w]
        ))
    

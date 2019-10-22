@@ -13,7 +13,9 @@
     "rendering/main.rkt"
     "sprites/main.rkt"
     "animations/main.rkt"
-    "scene-graph/main.rkt"))
+    "scene-graph/main.rkt"
+    
+    "threading-util.rkt"))
 
 
 (require
@@ -28,4 +30,6 @@
   "rendering/main.rkt" 
   "sprites/main.rkt"
   "animations/main.rkt"
-  "scene-graph/main.rkt")
+  "scene-graph/main.rkt"
+
+  "threading-util.rkt")
