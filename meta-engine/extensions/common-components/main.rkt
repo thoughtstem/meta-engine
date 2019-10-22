@@ -11,7 +11,8 @@
     "position-rotation-size.rkt"
     "sub-game.rkt"
     "time.rkt"
-    "toggle.rkt"))
+    "toggle.rkt"
+    "on-rule.rkt"))
 
 (require
   "counter.rkt"
@@ -23,4 +24,5 @@
   "position-rotation-size.rkt"
   "sub-game.rkt"
   "time.rkt"
-  "toggle.rkt")
+  "toggle.rkt"
+  "on-rule.rkt")

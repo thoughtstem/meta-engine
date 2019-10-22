@@ -19,11 +19,45 @@
          "../common-components/main.rkt" 
          "./animated-sprite.rkt")
 
-(provide buttons)
+(provide buttons
+         key->char)
 
 ;TODO: This needs to get fleshed out better.  And probably needs to get handled in extensions/input/
 ;  so that we can better separate rendering from input.
-(define buttons
+
+(define (key->char key)
+  (cond [(char? key) key]
+        [(symbol? key) (read (open-input-string (~a "#\\" key)))]
+        [(string? key) (read (open-input-string (~a "#\\" key)))]
+        [else (error "That wasn't a valid key!")]))
+
+
+(define-syntax-rule (define-all-keys buttons keys ...)
+  (begin (provide buttons)
+         (define buttons
+           (make-hash (list (cons 'keys #f)
+                            ...)))))
+
+(define-syntax-rule (make-key-hash keys ...)
+  (make-hash (list (cons (key->char 'keys) #f)
+                   ...)))
+
+(define-all-keys buttons
+  left right up down wheel-up wheel-down
+  rshift lshift
+  backspace
+  enter
+  space
+  a b c d e f g h i j k l m n o p q r s t u v w x y z
+  A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+  0 1 2 3 4 5 6 7 8 9
+  * - / + = < >
+  |#| : |,| |.| | |
+  |"| |'|
+  |]| |[|
+  )
+  
+#;(define buttons
   (hash
     #\a #f
     #\d #f
@@ -61,27 +95,29 @@
        
        [(and (key-event? e)
              (eq? 'press 
-                  (send e get-key-release-code))
+                  (string->symbol (~a (send e get-key-release-code))))
              )
 
         (begin
-          (set! buttons
-            (hash-set buttons
-                      (send e get-key-code)
-                      #t))
+          ;(set! buttons
+            (hash-set! buttons
+                      (string->symbol (~a (send e get-key-code)))
+                      #t)
+            ;)
 
           w)]
 
        [(and (key-event? e)
              (eq? 
                'release
-               (send e get-key-code)))
+               (string->symbol (~a (send e get-key-code)))))
 
         (begin
-          (set! buttons
-            (hash-set buttons
-                      (send e get-key-release-code)
-                      #f))
+          ;(set! buttons
+            (hash-set! buttons
+                      (string->symbol (~a (send e get-key-release-code)))
+                      #f)
+            ;)
 
           w)]
 
