@@ -13,13 +13,15 @@
          (prefix-in ml: mode-lambda/static)
          (prefix-in gl: mode-lambda/backend/gl)
          (prefix-in ml: mode-lambda/text/runtime)
-         lux/chaos/gui/key)
+         lux/chaos/gui/key
+         lux/chaos/gui/mouse)
 
 (require "../../core/main.rkt"
          "../common-components/main.rkt" 
          "./animated-sprite.rkt")
 
 (provide buttons
+         mouse-input
          key->char)
 
 ;TODO: This needs to get fleshed out better.  And probably needs to get handled in extensions/input/
@@ -66,6 +68,12 @@
 
     #\space #f))
 
+(define mouse-input
+  (make-weak-hash
+   (list (cons 'left #f)
+         (cons 'right #f)
+         (cons 'position (posn 0 0)))))
+
 
 (define (center-posn)
   (posn (/ CURRENT-WIDTH 2) (/ CURRENT-HEIGHT 2)))
@@ -95,32 +103,46 @@
        
        [(and (key-event? e)
              (eq? 'press 
-                  (string->symbol (~a (send e get-key-release-code))))
-             )
-
+                  (string->symbol (~a (send e get-key-release-code)))))
         (begin
-          ;(set! buttons
             (hash-set! buttons
                       (string->symbol (~a (send e get-key-code)))
                       #t)
-            ;)
-
           w)]
 
        [(and (key-event? e)
-             (eq? 
-               'release
+             (eq? 'release
                (string->symbol (~a (send e get-key-code)))))
-
         (begin
-          ;(set! buttons
             (hash-set! buttons
                       (string->symbol (~a (send e get-key-release-code)))
                       #f)
-            ;)
-
+          w)]
+       
+       [(and (mouse-event? e)
+             (send e moving?))
+        (let-values ([(mouse-x mouse-y) (mouse-event-xy e)])
+          (hash-set! mouse-input
+                     'position (posn mouse-x mouse-y))
           w)]
 
+       [(and (mouse-event? e)
+             (send e button-changed?)
+             (send e button-down?))
+        (begin
+          (hash-set! mouse-input
+                     (string->symbol (string-trim (~a (send e get-event-type)) "-down"))
+                     #t)
+          w)]
+
+       [(and (mouse-event? e)
+             (send e button-changed?)
+             (send e button-up?))
+        (begin
+          (hash-set! mouse-input
+                     (string->symbol (string-trim (~a (send e get-event-type)) "-up"))
+                     #f)
+          w)]
        
        [else w]
        ))
