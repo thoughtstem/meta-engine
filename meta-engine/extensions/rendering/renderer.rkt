@@ -13,17 +13,53 @@
          (prefix-in ml: mode-lambda/static)
          (prefix-in gl: mode-lambda/backend/gl)
          (prefix-in ml: mode-lambda/text/runtime)
-         lux/chaos/gui/key)
+         lux/chaos/gui/key
+         lux/chaos/gui/mouse)
 
 (require "../../core/main.rkt"
          "../common-components/main.rkt" 
          "./animated-sprite.rkt")
 
-(provide buttons)
+(provide buttons
+         mouse-input
+         key->char)
 
 ;TODO: This needs to get fleshed out better.  And probably needs to get handled in extensions/input/
 ;  so that we can better separate rendering from input.
-(define buttons
+
+(define (key->char key)
+  (cond [(char? key) key]
+        [(symbol? key) (read (open-input-string (~a "#\\" key)))]
+        [(string? key) (read (open-input-string (~a "#\\" key)))]
+        [else (error "That wasn't a valid key!")]))
+
+
+(define-syntax-rule (define-all-keys buttons keys ...)
+  (begin (provide buttons)
+         (define buttons
+           (make-hash (list (cons 'keys #f)
+                            ...)))))
+
+(define-syntax-rule (make-key-hash keys ...)
+  (make-hash (list (cons (key->char 'keys) #f)
+                   ...)))
+
+(define-all-keys buttons
+  left right up down wheel-up wheel-down
+  rshift lshift
+  backspace
+  enter
+  space
+  a b c d e f g h i j k l m n o p q r s t u v w x y z
+  A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+  0 1 2 3 4 5 6 7 8 9
+  * - / + = < >
+  |#| : |,| |.| | |
+  |"| |'|
+  |]| |[|
+  )
+  
+#;(define buttons
   (hash
     #\a #f
     #\d #f
@@ -31,6 +67,12 @@
     #\s #f
 
     #\space #f))
+
+(define mouse-input
+  (make-weak-hash
+   (list (cons 'left #f)
+         (cons 'right #f)
+         (cons 'position (posn 0 0)))))
 
 
 (define (center-posn)
@@ -51,33 +93,6 @@
 
    (define (word-event w e)
      (cond
-
-       [(and (key-event? e)
-             (eq? 'press 
-                  (send e get-key-release-code))
-             )
-
-        (begin
-          (set! buttons
-            (hash-set buttons
-                      (send e get-key-code)
-                      #t))
-
-          w)]
-
-       [(and (key-event? e)
-             (eq? 
-               'release
-               (send e get-key-code)))
-
-        (begin
-          (set! buttons
-            (hash-set buttons
-                      (send e get-key-release-code)
-                      #f))
-
-          w)]
-
        [(or (eq? e 'close)
             (and (key-event? e)
                  (eq? (send e get-key-code) 'escape)))
@@ -85,6 +100,50 @@
           (display-performance-stats)
           #f)
         ]
+       
+       [(and (key-event? e)
+             (eq? 'press 
+                  (string->symbol (~a (send e get-key-release-code)))))
+        (begin
+            (hash-set! buttons
+                      (string->symbol (~a (send e get-key-code)))
+                      #t)
+          w)]
+
+       [(and (key-event? e)
+             (eq? 'release
+               (string->symbol (~a (send e get-key-code)))))
+        (begin
+            (hash-set! buttons
+                      (string->symbol (~a (send e get-key-release-code)))
+                      #f)
+          w)]
+       
+       [(and (mouse-event? e)
+             (send e moving?))
+        (let-values ([(mouse-x mouse-y) (mouse-event-xy e)])
+          (hash-set! mouse-input
+                     'position (posn mouse-x mouse-y))
+          w)]
+
+       [(and (mouse-event? e)
+             (send e button-changed?)
+             (send e button-down?))
+        (begin
+          (hash-set! mouse-input
+                     (string->symbol (string-trim (~a (send e get-event-type)) "-down"))
+                     #t)
+          w)]
+
+       [(and (mouse-event? e)
+             (send e button-changed?)
+             (send e button-up?))
+        (begin
+          (hash-set! mouse-input
+                     (string->symbol (string-trim (~a (send e get-event-type)) "-up"))
+                     #f)
+          w)]
+       
        [else w]
        ))
    

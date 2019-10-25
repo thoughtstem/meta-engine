@@ -1,5 +1,7 @@
 #lang racket
 
+(displayln "HI")
+
 (provide delta-time-entity
          get-delta-time
          get-game-delta-time
