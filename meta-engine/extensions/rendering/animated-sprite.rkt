@@ -27,14 +27,59 @@
   layer
   get-layer
   layer?
+
+  (except-out (struct-out text-sprite) text-sprite)
+  (rename-out [make-text-sprite text-sprite])
+  set-text-sprite-scale
+  set-text-sprite-font
+  set-text-sprite-color
+  get-font-size
+  MONOSPACE-FONT-FACE
   )
 
 (require "../../core/main.rkt"
          "../common-components/main.rkt"
-         (only-in 2htdp/image bitmap/file image->color-list crop image-width image-height))
+         (only-in 2htdp/image bitmap/file image->color-list crop image-width image-height)
+         
+         )
 
+; ==== TEXT SPRITE ====
+(define MONOSPACE-FONT-FACE
+  (cond [(eq? (system-type 'os) 'windows) "Consolas" ]
+        [(eq? (system-type 'os) 'macosx)  "Menlo"]
+        [(eq? (system-type 'os) 'unix)    "DejaVu Sans Mono"]))
+
+(struct text-sprite (string scale font color))
+
+(define (make-text-sprite s
+                         #:scale [scale 1]
+                         #:font  [font #f]
+                         #:color [color 'yellow])
+  (text-sprite s scale font color))
+
+(define (set-text-sprite-scale s tf)
+  (struct-copy text-sprite tf
+               [scale s]))
+
+(define (set-text-sprite-font f tf)
+  (struct-copy text-sprite tf
+               [font f]))
+
+(define (set-text-sprite-color c tf)
+  (struct-copy text-sprite tf
+               [color c]))
+
+(define (get-font-size tf)
+  (if (text-sprite-font tf)
+      (send (text-sprite-font tf) get-size)
+      13))
+
+
+
+; ==== END TEXT SPRITE ====
+ 
 (define-component also-render game?)
-(define-component sprite symbol?)
+(define-component sprite (or/c symbol? string? text-sprite?))
 (define-component layer number?)
 (define-component transparency number?)
 
@@ -49,7 +94,6 @@
 
 (define (seen? i)
   (member i seen-sprite-ids))
-
 
 (define (image->id i)
   (string->symbol

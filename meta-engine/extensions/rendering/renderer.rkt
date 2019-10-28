@@ -2,7 +2,9 @@
 
 (provide play play!
          CURRENT-WIDTH CURRENT-HEIGHT
-         center-posn)
+         center-posn
+         register-fonts!
+         )
 
 (require racket/match
          racket/fixnum
@@ -13,12 +15,14 @@
          (prefix-in ml: mode-lambda/static)
          (prefix-in gl: mode-lambda/backend/gl)
          (prefix-in ml: mode-lambda/text/runtime)
+         (prefix-in ml: mode-lambda/text/static)
          lux/chaos/gui/key
          lux/chaos/gui/mouse)
 
 (require "../../core/main.rkt"
          "../common-components/main.rkt" 
-         "./animated-sprite.rkt")
+         "./animated-sprite.rkt"
+         image-coloring)
 
 (provide buttons
          mouse-input
@@ -168,6 +172,7 @@
 
 
 (define recompiled #f)
+(define should-recompile? #f)
 (define csd #f)
 (define CURRENT-WIDTH 400)
 (define CURRENT-HEIGHT 400)
@@ -183,7 +188,32 @@
   (flush-queued-sprites!)
 
   (set! recompiled #t)
+
+  ; set the mode lambda font
+  (set! game-fonts
+        (map (λ(f)
+               (struct-copy font f
+                            [ml:font
+                             (ml:load-font! sd
+                                            #:scaling 1.0 ;(get-backing-scale)
+                                            #:size (font-size f)
+                                            #:face   (font-face f)
+                                            #:family (font-family f)
+                                            #:style  (font-style f)
+                                            #:weight (font-weight f)
+                                            ;#:smoothing 'unsmoothed
+                                            )]))
+             game-fonts))
+  
   (set! csd (ml:compile-sprite-db sd))
+
+  ; set the mode lambda text renderer
+  (set! game-fonts
+               (map (λ(f)
+                      (struct-copy font f
+                                   [renderer (ml:make-text-renderer (font-ml:font f) csd)]))
+                    game-fonts))
+  
   csd)
 
 (define (play! #:width (W 400) 
@@ -254,6 +284,103 @@
 
 (require (prefix-in h: 2htdp/image))
 
+; ============ FONT RENDERER ============
+(define (register-fonts! . fonts)
+  (define (seen-font-before f)
+    (findf (curry font-eq? f) game-fonts))
+
+  (define (object->font f)
+    (font (send f get-size)
+          (send f get-face)
+          (send f get-family)
+          (send f get-style)
+          (send f get-weight)
+          #f
+          #f))
+  
+  (define uncompiled-fonts
+    (filter-not seen-font-before
+                fonts))
+
+  (and (not (empty? uncompiled-fonts))
+       #;
+       (displayln "Registering New Fonts:")
+       #;
+       (displayln (~a (remove-duplicates (map object->font uncompiled-fonts))))
+       (set! game-fonts (append game-fonts (remove-duplicates (map object->font uncompiled-fonts))))
+       (set! should-recompile? #t)
+       ))
+
+(struct font (size face family style weight ml:font renderer) #:transparent)
+
+(define game-fonts
+  (list (font 13.0 MONOSPACE-FONT-FACE
+              'modern 'normal 'normal
+              #f
+              #f)))
+
+(define (font-eq? f1 f2)
+    (define f1-size   (send f1 get-size))
+    (define f1-face   (send f1 get-face))
+    (define f1-family (send f1 get-family))
+    (define f1-style  (send f1 get-style))
+    (define f1-weight (send f1 get-weight))
+
+    
+    (define f2-size   (font-size f2))
+    (define f2-face   (font-face f2))
+    (define f2-family (font-family f2))
+    (define f2-style  (font-style f2))
+    (define f2-weight (font-weight f2))
+    
+    (and (= f1-size f2-size)
+         (equal? f1-face f2-face)
+         (eq? f1-family f2-family)
+         (eq? f1-style f2-style)
+         (eq? f1-weight f2-weight)
+         ))
+
+(define (text-sprite->ml:sprite ts e)
+  ;(define get-backing-scale (dynamic-require 'racket/gui/base 'get-display-backing-scale))
+  (define (get-backing-scale) 1.0)
+  (define ts-string (text-sprite-string ts))
+  (define ts-scale (text-sprite-scale ts))
+  (define ts-font (text-sprite-font ts))
+  (define ts-color (text-sprite-color ts))
+  
+  (define ts-font-size (get-font-size ts))
+    
+  (define text-renderer
+    (font-renderer
+     (or (and ts-font
+              (findf (curry font-eq? ts-font) game-fonts))
+         (first game-fonts))))
+
+  (define (ensure-color ts-color)
+    (cond [((or/c symbol? string?) ts-color) (name->color ts-color)]
+          [(color? ts-color) ts-color]
+          [else (error "That wasn't a symbol, string, or color!")]))
+
+  (define p (call-if-proc (get-position e (posn 0 0))))
+  
+  (and text-renderer
+       (let ([c (ensure-color ts-color)]
+             [x-scale (posn-x (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1)))))]
+             [y-scale (posn-y (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1)))))])
+         (text-renderer ts-string
+                        #:r (color-red c) #:g (color-green c) #:b (color-blue c)
+                        #:layer (call-if-proc (get-layer e 0))
+                        
+                        #:mx (real->double-flonum (* x-scale ts-scale (get-backing-scale)))
+                        #:my (real->double-flonum (* y-scale ts-scale (get-backing-scale)))
+                        #:a (real->double-flonum (call-if-proc (get-transparency e 1)))
+                        (real->double-flonum (* (get-backing-scale)
+                                                (posn-x p)))
+                        (real->double-flonum (* (get-backing-scale)
+                                                (+ (posn-y p)
+                                                   (- (* ts-font-size .75)))))
+                        )))
+  )
 
 (define (game->ml-sprite-list g)
   (define ret '())
@@ -264,28 +391,34 @@
     (when s 
       (define eid (entity-id e))
 
-      (when new-sprites-added 
+      (when (or new-sprites-added should-recompile?)
+        (set! should-recompile? #f)
         (displayln "Recompiling sprite db")
         (init-db) ;Try reinitializing the database, pulling from the sprite queue again
         )
 
+      (define s-val (call-if-proc (get-sprite s)))
+      
       (define sid 
-        (ml:sprite-idx csd (call-if-proc (sprite-id s))))
+        (and (symbol? s-val)
+             (ml:sprite-idx csd s-val)))
 
 
       ;Note.  Where there are many entities (several hundred), all of these get-*s add up.  Consider looking for optimizations.  (However, it is also worth noting that rendering is usually not the first bottleneck.  Only after certain optimizations -- e.g. demos/bullet-cloud.rkt -- does rendering become the bottleneck)
       (define p (call-if-proc (get-position e (posn 0 0))))
 
       (define mls
-        (ml:sprite #:layer (call-if-proc (get-layer e 0))
-                   #:m (real->double-flonum (call-if-proc (get-size e 1)))
-                   #:mx (real->double-flonum (posn-x (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1))))))
-                   #:my (real->double-flonum (posn-y (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1))))))
-                   #:theta (real->double-flonum (call-if-proc (get-rotation e 0)))
-                   #:a (real->double-flonum (call-if-proc (get-transparency e 1))) 
-                   (real->double-flonum (posn-x p))
-                   (real->double-flonum (posn-y p))
-                   sid))
+        (cond [(text-sprite? s-val) (text-sprite->ml:sprite s-val e)]
+              [(symbol? s-val) (ml:sprite #:layer (call-if-proc (get-layer e 0))
+                                        #:m (real->double-flonum (call-if-proc (get-size e 1)))
+                                        #:mx (real->double-flonum (posn-x (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1))))))
+                                        #:my (real->double-flonum (posn-y (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1))))))
+                                        #:theta (real->double-flonum (call-if-proc (get-rotation e 0)))
+                                        #:a (real->double-flonum (call-if-proc (get-transparency e 1))) 
+                                        (real->double-flonum (posn-x p))
+                                        (real->double-flonum (posn-y p))
+                                        sid)]
+              [else (error "That wasn't a valid sprite")]))
 
       (set! ret (cons mls ret))) 
     

@@ -16,7 +16,7 @@
 (define (get-x-speed) 120) ; 100 pps (pixels per second)
 (define (get-y-speed) 120)
 
-(define (get-time-based-input-position) ;with left-right wrap around
+(define (get-time-based-input-position)
   (define capped-dt (min (get-game-delta-time) (/ 1 30.0)))
   (posn-add (get-position)
             (posn-multiply (as-posn (get-current-input))
