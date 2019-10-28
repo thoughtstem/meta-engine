@@ -6,20 +6,29 @@
 (require "../../core/main.rkt"
          "../input/main.rkt"
          "./animated-sprite.rkt"
-         "../common-components/main.rkt")
+         "../common-components/main.rkt"
+         "../common-components/time.rkt")
 
 (define-component animation-system entity?)
 
+(define (call-if-proc p)
+  (if (procedure? p) (p) p))
+
+(define time-based-counter
+  (thunk*
+   (+ (get-counter) (get-game-delta-time))))
+
 ;Cool.  What's the next abstraction step?
 (define (make-animation-system 
-          #:counter-update (counter-update add1)
-          #:direction-update (direction-update 
-                               identity)
+          #:counter-update   [counter-update time-based-counter]
+          #:direction-update [direction-update identity]
+          #:fps              [fps 5]
           up-frames right-frames down-frames left-frames)
   (list
     (animation-system
       (entity 
-        (counter 0 (^ counter-update))
+        (counter 0 (^ counter-update)
+                 )
         (direction (posn 0 0) (^ direction-update))
 
         (facing 'left
@@ -43,9 +52,14 @@
                     [(eq? 'down (get-facing)) down-frames])
                   (if (equal? (posn 0 0) (get-direction))
                     0  
-                    (remainder (get-counter) 
-                               (length left-frames))))))   
-      (^ tick-entity)) 
+                    #;(exact-floor (/ (modulo (get-counter) 
+                                            (* (length left-frames) (call-if-proc fps)))
+                                    (call-if-proc fps)))
+                    (modulo (exact-floor (* (get-counter) (call-if-proc fps)))
+                            (* (length left-frames)))
+
+                    ))))
+      (^ tick-entity))
 
     (sprite (first left-frames)
             (get-sprite (get-animation-system)))))
