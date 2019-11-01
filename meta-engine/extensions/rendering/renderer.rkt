@@ -4,6 +4,9 @@
          CURRENT-WIDTH CURRENT-HEIGHT
          center-posn
          register-fonts!
+         get-sprite-width
+         get-sprite-height
+         init-db
          )
 
 (require racket/match
@@ -37,6 +40,13 @@
         [(string? key) (read (open-input-string (~a "#\\" key)))]
         [else (error "That wasn't a valid key!")]))
 
+(define (key-code->symbol a-key)
+  (define key-str (~a a-key))
+  (cond [(string=? key-str "\b") 'backspace]
+        [(string=? key-str "\n") 'enter]
+        [(string=? key-str "\r") 'enter]
+        [(string=? key-str " ")  'space]
+        [else (string->symbol key-str)]))
 
 (define-syntax-rule (define-all-keys buttons keys ...)
   (begin (provide buttons)
@@ -107,19 +117,19 @@
        
        [(and (key-event? e)
              (eq? 'press 
-                  (string->symbol (~a (send e get-key-release-code)))))
+                  (key-code->symbol (send e get-key-release-code))))
         (begin
             (hash-set! buttons
-                      (string->symbol (~a (send e get-key-code)))
+                      (key-code->symbol (send e get-key-code))
                       #t)
           w)]
 
        [(and (key-event? e)
              (eq? 'release
-               (string->symbol (~a (send e get-key-code)))))
+               (key-code->symbol (send e get-key-code))))
         (begin
             (hash-set! buttons
-                      (string->symbol (~a (send e get-key-release-code)))
+                      (key-code->symbol (send e get-key-release-code))
                       #f)
           w)]
        
@@ -400,8 +410,8 @@
       (define s-val (call-if-proc (get-sprite s)))
       
       (define sid 
-        (and (symbol? s-val)
-             (ml:sprite-idx csd s-val)))
+        (and (image-sprite? s-val) ;(symbol? s-val)
+             (ml:sprite-idx csd (image-sprite-id s-val))))
 
 
       ;Note.  Where there are many entities (several hundred), all of these get-*s add up.  Consider looking for optimizations.  (However, it is also worth noting that rendering is usually not the first bottleneck.  Only after certain optimizations -- e.g. demos/bullet-cloud.rkt -- does rendering become the bottleneck)
@@ -409,7 +419,7 @@
 
       (define mls
         (cond [(text-sprite? s-val) (text-sprite->ml:sprite s-val e)]
-              [(symbol? s-val) (ml:sprite #:layer (call-if-proc (get-layer e 0))
+              [(image-sprite? s-val) (ml:sprite #:layer (call-if-proc (get-layer e 0))
                                         #:m (real->double-flonum (call-if-proc (get-size e 1)))
                                         #:mx (real->double-flonum (posn-x (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1))))))
                                         #:my (real->double-flonum (posn-y (call-if-proc (get-size-xy e (posn (get-size e 1) (get-size e 1))))))
@@ -446,4 +456,6 @@
 ;Adds to an uncompiled sprite database...
 (define (add-sprite! db id-sym i)
   (ml:add-sprite!/value db id-sym i))
+
+
 
