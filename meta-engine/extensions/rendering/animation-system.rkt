@@ -1,7 +1,8 @@
 #lang racket 
 (provide (rename-out [make-animation-system
                       animation-system]) 
-         get-animation-system)
+         get-animation-system
+         animated-sprite)
 
 (require "../../core/main.rkt"
          "../input/main.rkt"
@@ -63,5 +64,25 @@
 
     (sprite (first left-frames)
             (get-sprite (get-animation-system)))))
+
+(define (animated-sprite 
+          #:counter-update   [counter-update time-based-counter]
+          #:fps              [fps 5]
+          frames)
+  (list
+   (animation-system
+    (entity 
+     (counter 0 (^ counter-update))
+     (sprite (first frames)
+             (list-ref frames
+                       (modulo (exact-floor (* (get-counter) (call-if-proc fps)))
+                               (* (length frames)))
+                       )))
+    (^ tick-entity))
+
+    (sprite (first frames)
+            (get-sprite (get-animation-system)))))
+
+
 
 

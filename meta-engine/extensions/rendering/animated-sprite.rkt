@@ -15,6 +15,7 @@
   set-seen-sprite-ids! 
 
   sheet->list
+  sprite-row->list
 
   also-render?
   also-render
@@ -28,21 +29,45 @@
   get-layer
   layer?
 
+  (except-out (struct-out image-sprite) image-sprite)
+  (rename-out [make-image-sprite image-sprite])
+  
   (except-out (struct-out text-sprite) text-sprite)
   (rename-out [make-text-sprite text-sprite])
+
   set-text-sprite-scale
   set-text-sprite-font
   set-text-sprite-color
   get-font-size
   MONOSPACE-FONT-FACE
+  get-sprite-width
+  get-sprite-height
   )
 
 (require "../../core/main.rkt"
          "../common-components/main.rkt"
-         (only-in 2htdp/image bitmap/file image->color-list crop image-width image-height)
+         (only-in 2htdp/image bitmap/file image->color-list crop image-width image-height text/font)
          
          )
+; ==== IMAGE SPRITE ====
+(struct image-sprite (id width height))
 
+(define (make-image-sprite s)
+  (if (image-sprite? s)
+      s
+      (register-sprite s)))
+
+(define (get-sprite-width s)
+  (if (text-sprite? s)
+      (text-sprite-width s)
+      (image-sprite-width s)))
+
+(define (get-sprite-height s)
+  (if (text-sprite? s)
+      (text-sprite-height s)
+      (image-sprite-height s)))
+
+                                
 ; ==== TEXT SPRITE ====
 (define MONOSPACE-FONT-FACE
   (cond [(eq? (system-type 'os) 'windows) "Consolas" ]
@@ -56,6 +81,50 @@
                          #:font  [font #f]
                          #:color [color 'yellow])
   (text-sprite s scale font color))
+
+(define (text-sprite-width ts)
+  (image-width (if (text-sprite-font ts)
+                   (let ([f (text-sprite-font ts)])
+                     (text/font (text-sprite-string ts)
+                              (send f get-size)
+                              (text-sprite-color ts)
+                              (send f get-face)
+                              (send f get-family)
+                              (send f get-style)
+                              (send f get-weight)
+                              #f))
+                   (text/font (text-sprite-string ts)
+                              13
+                              (text-sprite-color ts)
+                              MONOSPACE-FONT-FACE
+                              'modern
+                              'normal
+                              'normal
+                              #f))))
+
+(define (text-sprite-height ts)
+  #;(image-height (if (text-sprite-font ts)
+                    (let ([f (text-sprite-font ts)])
+                      (text/font (text-sprite-string ts)
+                                 (send f get-size)
+                                 (text-sprite-color ts)
+                                 (send f get-face)
+                                 (send f get-family)
+                                 (send f get-style)
+                                 (send f get-weight)
+                                 #f))
+                    (text/font (text-sprite-string ts)
+                               13
+                               (text-sprite-color ts)
+                               MONOSPACE-FONT-FACE
+                               'modern
+                               'normal
+                               'normal
+                               #f)))
+  (if (text-sprite-font ts)
+      (send (text-sprite-font ts) get-size)
+      13)
+  )
 
 (define (set-text-sprite-scale s tf)
   (struct-copy text-sprite tf
@@ -79,7 +148,7 @@
 ; ==== END TEXT SPRITE ====
  
 (define-component also-render game?)
-(define-component sprite (or/c symbol? string? text-sprite?))
+(define-component sprite (or/c text-sprite? image-sprite?))
 (define-component layer number?)
 (define-component transparency number?)
 
@@ -118,7 +187,7 @@
       (set-insertion-queue! (cons (list id final-image) insertion-queue))
       (set-seen-sprite-ids! (cons id seen-sprite-ids)))
 
-    id))
+    (image-sprite id (image-width final-image) (image-height final-image))))
 
 (define (set-insertion-queue! l)
   (set! insertion-queue l))
@@ -154,4 +223,12 @@
   (define elves (list elf1 elf2 elf3 elf4))
 
   elves)
+
+(define (sprite-row->list img columns)
+  (define frame-width (/ (image-width img) columns))
+  (define frame-height (image-height img))
+  (define (get-frame num)
+    (crop (* frame-width num) 0 frame-width frame-height img))
+  (map (compose make-image-sprite
+                get-frame) (range columns)))
 
