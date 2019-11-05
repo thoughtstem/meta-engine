@@ -125,7 +125,7 @@
   (with-handlers ([exn:fail? (thunk* 1)])
    (get 'parent-data 'size)))
 
-(define (children #:tick (t tick) . es)
+(define (children #:tick [t tick] . es)
   (also-render
     (game 
       (parent-data-entity

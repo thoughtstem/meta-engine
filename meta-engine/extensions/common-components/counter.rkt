@@ -1,6 +1,6 @@
 #lang racket
 
-(provide counter get-counter
+(provide counter get-counter set-counter
          normal-counter
          number-stream get-number-stream)
 (require "../../core/main.rkt")
