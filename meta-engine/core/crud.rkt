@@ -23,6 +23,7 @@
 
          ;Query language
          has-component
+         has-component-named
 
 
          ;Move to base?
@@ -273,6 +274,9 @@
          (if (symbol? c?)
            (hash-ref (entity-component-hash e) c? #f) 
            (findf c? (entity-components e))))))
+
+(define (has-component-named name e)
+  (has-component e (λ(c) (eq? (get-component-name c) name))))
 
 (define (get entity-name component-name)
   ;(displayln (~a "get " entity-name " " component-name))

@@ -42,6 +42,9 @@
   MONOSPACE-FONT-FACE
   get-sprite-width
   get-sprite-height
+
+  get-entity-width
+  get-entity-height
   )
 
 (require "../../core/main.rkt"
@@ -66,6 +69,30 @@
   (if (text-sprite? s)
       (text-sprite-height s)
       (image-sprite-height s)))
+
+(define (get-scale-posn e)
+  (get-size-xy e (posn (get-size e 1)
+                       (get-size e 1))))
+
+(define (get-entity-width e)
+  (if (has-component-named 'sprite e)
+      (max (* (get-sprite-width (get-sprite e)) (posn-x (get-scale-posn e))) ;(get-size-xy e (posn (get-size e 1) (get-size e 1)))))
+           (if (has-component-named 'also-render e)
+               (apply max (map get-entity-width (game-entities (tick (get-also-render e)))))
+               0))
+      (if (has-component-named 'also-render e)
+          (apply max (map get-entity-width (game-entities (tick (get-also-render e)))))
+          0)))
+
+(define (get-entity-height e)
+  (if (has-component-named 'sprite e)
+      (max (* (get-sprite-height (get-sprite e)) (posn-y (get-scale-posn e))) ;(get-size-xy e (posn (get-size e 1) (get-size e 1)))))
+           (if (has-component-named 'also-render e)
+               (apply max (map get-entity-height (game-entities (tick (get-also-render e)))))
+               0))
+      (if (has-component-named 'also-render e)
+          (apply max (map get-entity-height (game-entities (tick (get-also-render e)))))
+          0)))
 
                                 
 ; ==== TEXT SPRITE ====

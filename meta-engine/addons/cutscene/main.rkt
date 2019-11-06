@@ -76,7 +76,7 @@
    (if rp
        (relative-position rp)
        (list (position (or p (posn 0 0))
-                       (or p (go-to-center)))
+                       (or p (go-to-pos 'center)))
              (position-hack #t)))
    (death #f (join (on-key 'enter (despawn))
                    (on-key 'space (despawn))
@@ -132,7 +132,7 @@
                           (on-key 'q (despawn))
                           (on-key 'enter (on-rule (= (get-counter) (sub1 (length pages))) (despawn)))))
           (position (or p (posn 0 0))
-                    (or p (go-to-center)))
+                    (or p (go-to-pos 'center)))
           (relative-rotation 0)
           (relative-size 1)
           (also-render

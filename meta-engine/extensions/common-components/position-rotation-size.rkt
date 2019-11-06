@@ -31,7 +31,7 @@
   get-size-xy
   size-xy?
 
-  move-to
+  move-to            ;this should be go-to?
  
   posn-map
   posn-wrap
@@ -41,7 +41,7 @@
   posn-dist
   posn-normalize
 
-  move-to-destination
+  move-to-destination ;this should be move-to or glide-to?
 
 
   )
@@ -80,6 +80,8 @@
 
 (define (y e)
   (posn-y (get-position e)))
+
+
 
 (define (move-to p e)
 
