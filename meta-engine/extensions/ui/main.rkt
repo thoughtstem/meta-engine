@@ -43,7 +43,7 @@
                     )))
 
 
-; ==== POSITION ALIGNMNT FUNCTIONS ====
+; ==== POSITION ALIGNMENT FUNCTIONS ====
 
 (define (go-to-center)
   (posn (/ CURRENT-WIDTH 2) (/ CURRENT-HEIGHT 2)))
@@ -82,8 +82,8 @@
   (define HEIGHT CURRENT-HEIGHT)
   (define p (get-position))
   ;(define as (get-sprite))
-  (define hw (/ (get-entity-width (CURRENT-ENTITY)) 2))
-  (define hh (/ (get-entity-height (CURRENT-ENTITY)) 2))
+  (define hw (/ (get-entity-width) 2))
+  (define hh (/ (get-entity-height) 2))
   (define pos-x (posn-x p))
   (define pos-y (posn-y p))
   (posn-add

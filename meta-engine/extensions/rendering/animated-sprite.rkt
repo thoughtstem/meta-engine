@@ -74,9 +74,9 @@
   (get-size-xy e (posn (get-size e 1)
                        (get-size e 1))))
 
-(define (get-entity-width e)
+(define (get-entity-width [e (CURRENT-ENTITY)])
   (if (has-component-named 'sprite e)
-      (max (* (get-sprite-width (get-sprite e)) (posn-x (get-scale-posn e))) ;(get-size-xy e (posn (get-size e 1) (get-size e 1)))))
+      (max (* (get-sprite-width (get-sprite e)) (posn-x (get-scale-posn e)))
            (if (has-component-named 'also-render e)
                (apply max (map get-entity-width (game-entities (tick (get-also-render e)))))
                0))
@@ -84,9 +84,9 @@
           (apply max (map get-entity-width (game-entities (tick (get-also-render e)))))
           0)))
 
-(define (get-entity-height e)
+(define (get-entity-height [e (CURRENT-ENTITY)])
   (if (has-component-named 'sprite e)
-      (max (* (get-sprite-height (get-sprite e)) (posn-y (get-scale-posn e))) ;(get-size-xy e (posn (get-size e 1) (get-size e 1)))))
+      (max (* (get-sprite-height (get-sprite e)) (posn-y (get-scale-posn e)))
            (if (has-component-named 'also-render e)
                (apply max (map get-entity-height (game-entities (tick (get-also-render e)))))
                0))
