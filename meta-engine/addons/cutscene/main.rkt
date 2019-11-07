@@ -1,7 +1,8 @@
 #lang racket
 
 (provide (rename-out (make-cutscene cutscene))
-         page)
+         page
+         duration get-duration set-duration)
 
 (require "../../extensions/main.rkt")
 
@@ -18,6 +19,7 @@
           [else (error "That wasn't a valid sprite!")]))
 
 (define-component position-hack boolean?)
+(define-component duration (or/c #f number?))
 
 ; ===== PAGE ENTITY =====
 (define (page #:width        [w #f]
@@ -27,7 +29,7 @@
               #:bg           [bg #f]
               #:bg-color     [bg-color (color 50 50 50)]
               #:border-color [border-color 'white]
-              #:duration     [duration #f]
+              #:duration     [dur #f]
               #:line-padding [line-padding 4]
               #:mode         [mode 'still]
               . items)
@@ -78,9 +80,15 @@
        (list (position (or p (posn 0 0))
                        (or p (go-to-pos 'center)))
              (position-hack #t)))
+   (counter 0 (^ (curry + (get-game-delta-time))))
+   (duration dur)
    (death #f (join (on-key 'enter (despawn))
                    (on-key 'space (despawn))
-                   (on-key 'q (despawn))))
+                   (on-key 'q (despawn))
+                   (if dur
+                       (on-rule (>= (get-counter) dur) (despawn))
+                       (get-death))
+                ))
    (apply children (append (list (delta-time-entity))
                            offset-items-list                      
                            (list (bordered-box w h #:relative-position (posn 0 0) #:color bg-color #:border-color border-color))))))
@@ -110,6 +118,8 @@
 
   (f g))
 
+(define-component running-page-time number?)
+
 (define (make-cutscene #:name [n 'cutscene]
                        #:position [p #f] . pages)
   (define (remove-death e)
@@ -125,9 +135,22 @@
                                       remove-death) pages))
   
   (entity (name n)
-          (counter 0 (on-key 'enter (^ (compose (curryr modulo (length pages))
+          (counter 0 (join (on-key 'enter (^ (compose (curryr modulo (length pages))
                                                 add1)
-                                       )))
+                                             ))
+                           (let ([dur (get-duration (list-ref pages (get-counter)))])
+                             (if dur
+                                  (on-rule (>= (get-running-page-time) dur)
+                                           (^ (compose (curryr modulo (length pages))
+                                                     add1)
+                                              ))
+                                  (get-counter)
+                                  )
+                             )))
+          (running-page-time 0 (if (or (not (get-duration (list-ref pages (get-counter))))
+                                       (>= (get-running-page-time) (get-duration (list-ref pages (get-counter)))))
+                                   0
+                                   (^ (curry + (get-game-delta-time)))))
           (death #f (join (on-key 'backspace (despawn))
                           (on-key 'q (despawn))
                           (on-key 'enter (on-rule (= (get-counter) (sub1 (length pages))) (despawn)))))
