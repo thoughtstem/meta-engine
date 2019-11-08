@@ -2,6 +2,8 @@
 
 (provide (rename-out (make-cutscene cutscene))
          page
+         current-page get-current-page set-current-page
+         current-page-time
          duration get-duration set-duration)
 
 (require "../../extensions/main.rkt")
@@ -98,30 +100,39 @@
 
 ;(define-component cutscene entity?)
 
-(define (propagate-to-child-parent-data-with-counter g)
+(define (propagate-to-child-parent-data-with-page g)
   (define (f g) 
     (define pd 
       (hash-ref (game-entity-hash g)
                 'parent-data))
 
     (define new-pd
-      (set-counter
+      (set-current-page
        (set-rotation
         (set-position
          (set-size pd 
                    (get-size))
           (get-position))
         (get-rotation))
-       (get-counter)))
+       (get-current-page)))
     
     (update-entity g pd new-pd))
 
   (f g))
 
-(define-component running-page-time number?)
+
+(define-component current-page number?)
+(define-component last-page number?)
+(define-component game-time number?)
+(define-component last-page-time number?)
+
+(define (current-page-time [e (CURRENT-ENTITY)])
+    (- (get-game-time e) (get-last-page-time e)))
 
 (define (make-cutscene #:name [n 'cutscene]
-                       #:position [p #f] . pages)
+                       #:position [p #f]
+                       #:show-game-time? [show-game-time? #f]
+                       . pages)
   (define (remove-death e)
     (remove-component e (λ(c) (eq? (get-component-name c) 'death))))
 
@@ -133,42 +144,55 @@
            
   (define updated-pages (map (compose update-position
                                       remove-death) pages))
-  
-  (entity (name n)
-          (counter 0 (join (on-key 'enter (^ (compose (curryr modulo (length pages))
-                                                add1)
-                                             ))
-                           (let ([dur (get-duration (list-ref pages (get-counter)))])
-                             (if dur
-                                  (on-rule (>= (get-running-page-time) dur)
-                                           (^ (compose (curryr modulo (length pages))
-                                                     add1)
-                                              ))
-                                  (get-counter)
-                                  )
-                             )))
-          (running-page-time 0 (if (or (not (get-duration (list-ref pages (get-counter))))
-                                       (>= (get-running-page-time) (get-duration (list-ref pages (get-counter)))))
-                                   0
-                                   (^ (curry + (get-game-delta-time)))))
-          (death #f (join (on-key 'backspace (despawn))
-                          (on-key 'q (despawn))
-                          (on-key 'enter (on-rule (= (get-counter) (sub1 (length pages))) (despawn)))))
-          (position (or p (posn 0 0))
-                    (or p (go-to-pos 'center)))
-          (relative-rotation 0)
-          (relative-size 1)
-          (also-render
-           (game)
-           (tick
-            (propagate-to-child-parent-data-with-counter
-             (game (delta-time-entity)
-                  (key-manager-entity)
-                  (entity (name 'parent-data)
-                          (counter 0)
-                          (position (or p (posn 0 0)))
-                          (rotation 0)
-                          (size 1))
-                  (list-ref updated-pages (get-counter))))))
-          )
-)
+
+  (define (get-page-duration) (get-duration (list-ref pages (get-current-page))))
+
+  (apply entity
+    (filter identity
+      (list (name n)
+            (game-time 0 (^ (curry + (get-game-delta-time)))
+                       ;(/ (current-inexact-milliseconds) 1000) ; why doesn't this work? thunk* causes error too
+                       )
+            (current-page 0 (join (on-key 'enter (^ add1))
+                                  (if (get-page-duration)
+                                      (on-rule (>= (current-page-time) (get-page-duration)) ; Handling left over time below!
+                                               (^ add1))
+                                      (get-current-page))))
+            
+            (death #f (join (on-key 'backspace (despawn))
+                            (on-key 'q (despawn))
+                            (on-rule (>= (get-current-page) (length pages)) (despawn))))
+            
+            (last-page-time 0 (if (not (eq? (get-current-page) (get-last-page)))
+                                  (if (get-duration (list-ref pages (get-last-page)))
+                                      (- (get-game-time) (- (current-page-time)                               ; correcting last-page-time by SUBTRACTING the left over not ADDING!
+                                                            (get-duration (list-ref pages (get-last-page))))) ;gets duration BEFORE the switch
+                                      (get-game-time))
+                                  (get-last-page-time)))
+            (position (or p (posn 0 0))
+                      (or p (go-to-pos 'center)))
+            (relative-rotation 0)
+            (relative-size 1)
+            (if show-game-time?
+                (sprite (make-text "0 second(s)" #:font-size 24)
+                        (make-text (~a (~r (get-game-time)
+                                           #:precision '(= 3))
+                                       " second(s)")
+                                   #:font-size 24))
+                #f)
+            (also-render
+             (game)
+             (tick
+              (propagate-to-child-parent-data-with-page
+               (game (delta-time-entity)
+                     (key-manager-entity)
+                     (entity (name 'parent-data)
+                             (current-page 0)
+                             (position (or p (posn 0 0)))
+                             (rotation 0)
+                             (size 1))
+                     (list-ref updated-pages (min (get-current-page) (sub1 (length pages))))))))
+
+            (last-page 0 (get-current-page))
+          
+            ))))
