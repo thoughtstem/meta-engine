@@ -31,15 +31,25 @@
    (hash-ref mouse-hash mouse)
    (not (hash-ref last-mouse-hash mouse))))
 
-(define (on-mouse mouse updater [else (get-value (CURRENT-COMPONENT))])
+#|(define (on-mouse mouse updater [else (get-value (CURRENT-COMPONENT))])
   (on-rule (mouse-change-down? mouse)
            updater
-           else))
+           else))|#
 
-(define (on-mouse-hold mouse updater [else (get-value (CURRENT-COMPONENT))])
+(define-syntax on-mouse
+  (syntax-rules ()
+    [(on-mouse button updater else) (on-rule (mouse-change-down? button) updater else)]
+    [(on-mouse button updater)      (on-mouse button updater (get-value (CURRENT-COMPONENT)))]))
+
+#|(define (on-mouse-hold mouse updater [else (get-value (CURRENT-COMPONENT))])
   (on-rule (mouse-down? mouse)
            updater
-           else))
+           else))|#
+
+(define-syntax on-mouse-hold
+  (syntax-rules ()
+    [(on-mouse-hold button updater else) (on-rule (mouse-down? button) updater else)]
+    [(on-mouse-hold button updater)      (on-mouse-hold button updater (get-value (CURRENT-COMPONENT)))]))
 
 (define (mouse-manager-entity)
   (entity (name 'mouse-manager)
@@ -52,24 +62,27 @@
   (define mouse-hash (get-mouse-hash (get-entity g (has-name 'mouse-manager))))
   (hash-ref mouse-hash 'position))
 
-(define (on-sprite-click updater [else (get-value (CURRENT-COMPONENT))])
-    (define pos (get-position))
-    (define m-pos (get-mouse-position))
+(define (touching-pointer? [e (CURRENT-ENTITY)])
+  (define pos (get-position e))
+  (define m-pos (get-mouse-position e))
   
-    (define x (posn-x pos))
-    (define y (posn-y pos))
-    (define mx (posn-x m-pos))
-    (define my (posn-y m-pos))
-    (define w (get-entity-width))
-    (define h (get-entity-height))
+  (define x (posn-x pos))
+  (define y (posn-y pos))
+  (define mx (posn-x m-pos))
+  (define my (posn-y m-pos))
+  (define w (get-entity-width e))
+  (define h (get-entity-height e))
   
-    (define touching-pointer?
-      (and (> mx (- x (/ w 2)))
-           (< mx (+ x (/ w 2)))
-           (> my (- y (/ h 2)))
-           (< my (+ y (/ h 2)))))
-  (on-mouse 'left
-            (if touching-pointer?
-                updater
-                else)
-            else))
+  (and (> mx (- x (/ w 2)))
+       (< mx (+ x (/ w 2)))
+       (> my (- y (/ h 2)))
+       (< my (+ y (/ h 2)))))
+
+(define-syntax on-sprite-click
+  (syntax-rules ()
+    [(on-sprite-click updater else) (on-mouse 'left
+                                              (on-rule (touching-pointer?)
+                                                       updater
+                                                       else)
+                                              else)]
+    [(on-sprite-click updater) (on-sprite-click updater (get-value (CURRENT-COMPONENT)))]))

@@ -19,7 +19,9 @@
                       #:relative-position [rp #f]
                       #:outer-border-color [outer-border-color 'black]
                       #:border-color       [border-color 'white]
-                      #:color              [box-color 'dimgray])
+                      #:color              [box-color 'dimgray]
+                      #:other-children [other-children '()]
+                      )
   (define outer-border-img (square 1 'solid outer-border-color))
   (define inner-border-img (square 1 'solid border-color))
   (define box-img (square 1 'solid box-color))
@@ -28,19 +30,21 @@
               (relative-position rp)
               (position (or p (posn 0 0))
                         (or p (go-to-center))))
-          (children (parent (sprite (register-sprite box-img))
-                            (size-xy (posn 1 1)
-                                     (posn (- (or w CURRENT-WIDTH) 6) (- (or h CURRENT-HEIGHT) 6)))
-                            )
-                    (parent (sprite (register-sprite inner-border-img))
-                            (size-xy (posn 1 1)
-                                     (posn (- (or w CURRENT-WIDTH) 2) (- (or h CURRENT-HEIGHT) 2)))
-                            )
-                    (parent (sprite (register-sprite outer-border-img))
-                            (size-xy (posn 1 1)
-                                     (posn (or w CURRENT-WIDTH) (or h CURRENT-HEIGHT)))
-                            )
-                    )))
+          (apply children
+                 (append (flatten other-children)
+                         (list (parent (sprite (register-sprite box-img))
+                                       (size-xy (posn 1 1)
+                                                (posn (- (or w CURRENT-WIDTH) 6) (- (or h CURRENT-HEIGHT) 6)))
+                                       )
+                               (parent (sprite (register-sprite inner-border-img))
+                                       (size-xy (posn 1 1)
+                                                (posn (- (or w CURRENT-WIDTH) 2) (- (or h CURRENT-HEIGHT) 2)))
+                                       )
+                               (parent (sprite (register-sprite outer-border-img))
+                                       (size-xy (posn 1 1)
+                                                (posn (or w CURRENT-WIDTH) (or h CURRENT-HEIGHT)))
+                                       )
+                               )))))
 
 
 ; ==== POSITION ALIGNMENT FUNCTIONS ====
