@@ -2,6 +2,11 @@
 
 (provide 
   (all-from-out
-    "extensions/main.rkt"))
+    "extensions/main.rkt"
+    
+    "addons/main.rkt"
+    ))
 
-(require "extensions/main.rkt")
+(require "extensions/main.rkt"
+
+         "addons/main.rkt")

@@ -9,7 +9,8 @@
 		"threading"
 		"https://github.com/thoughtstem/racket-chipmunk.git"
                 "base"
-                "jack-ease"))
+                "jack-ease"
+                "image-coloring"))
 (define build-deps '("draw-doc"
                      "racket-doc"
                      "scribble-lib"

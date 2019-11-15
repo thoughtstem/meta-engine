@@ -15,7 +15,10 @@
     "animations/main.rkt"
     "scene-graph/main.rkt"
     "threading-util.rkt"
-    "do-once/main.rkt" ))
+    "do-once/main.rkt"
+    "ui/main.rkt"
+    
+    ))
 
 
 (require
@@ -32,4 +35,7 @@
   "animations/main.rkt"
   "scene-graph/main.rkt"
   "threading-util.rkt"
-  "do-once/main.rkt")
+  "do-once/main.rkt"
+  "ui/main.rkt"
+
+  )

@@ -30,15 +30,21 @@
    (hash-ref key-hash key)
    (not (hash-ref last-key-hash key))))
 
-(define (on-key key updater [else (get-value (CURRENT-COMPONENT))])
-  (on-rule (key-change-down? key)
-           updater
-           else))
+(define-syntax on-key
+  (syntax-rules ()
+    [(on-key key updater else) (on-rule (key-change-down? key) updater else)]
+    [(on-key key updater)      (on-key key updater (get-value (CURRENT-COMPONENT)))]))
 
-(define (on-key-hold key updater [else (get-value (CURRENT-COMPONENT))])
+#|(define (on-key-hold key updater [else (get-value (CURRENT-COMPONENT))])
   (on-rule (key-down? key)
            updater
-           else))
+           else))|#
+
+(define-syntax on-key-hold
+  (syntax-rules ()
+    [(on-key-hold key updater else) (on-rule (key-down? key) updater else)]
+    [(on-key-hold key updater)      (on-key-hold key updater (get-value (CURRENT-COMPONENT)))]))
+
 
 (define (key-manager-entity)
   (entity (name 'key-manager)

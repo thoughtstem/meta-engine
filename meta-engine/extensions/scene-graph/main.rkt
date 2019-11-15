@@ -22,7 +22,10 @@
          propagate-to-child-parent-data         
          parent
          children
-         propagate-to-child-parent-data)
+         propagate-to-child-parent-data
+
+         entity->parent
+         )
 
 (require "../../core/main.rkt")
 (require "../common-components/name.rkt")
@@ -123,14 +126,14 @@
   (with-handlers ([exn:fail? (thunk* 1)])
    (get 'parent-data 'size)))
 
-(define (children #:tick (t tick) . es)
+(define (children #:tick [t tick] . es)
   (also-render
     (game 
       (parent-data-entity
         (position (posn 0 0))
         (rotation 0)
         (size 1))
-      es)
+      (map entity->parent es))
     (^ (compose t propagate-to-child-parent-data))))
 
 (define (propagate-to-child-parent-data g)
@@ -159,4 +162,11 @@
    (relative-size 1) 
    (relative-position (posn 0 0))) 
   cs))
+
+(define (entity->parent e)
+  (maybe-add-components e
+                        (list (relative-rotation 0)
+                              (relative-size 1)
+                              (relative-position (posn 0 0)))))
+
 

@@ -6,6 +6,8 @@
          add-or-replace-components
          replace-component
 
+         maybe-add-components
+
          get
          get-component
          get-components
@@ -21,6 +23,7 @@
 
          ;Query language
          has-component
+         has-component-named
 
 
          ;Move to base?
@@ -272,6 +275,9 @@
            (hash-ref (entity-component-hash e) c? #f) 
            (findf c? (entity-components e))))))
 
+(define (has-component-named name e)
+  (has-component e (λ(c) (eq? (get-component-name c) name))))
+
 (define (get entity-name component-name)
   ;(displayln (~a "get " entity-name " " component-name))
 
@@ -307,6 +313,16 @@
       (add-component e c)))
 
   (foldl add-or-replace e fcs))
+
+(define (maybe-add-components e cs)
+  (define fcs (flatten cs)) 
+
+  (define (maybe-add c e)
+    (if (has-component e (get-component-name c))
+        e
+        (add-component e c)))
+
+  (foldl maybe-add e fcs))
 
 
 (define (get-component-name c)
