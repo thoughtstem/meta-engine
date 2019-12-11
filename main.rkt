@@ -1,5 +1,5 @@
 #lang racket
 
-(require lux)
+(require racket/gui/base)
 
 (module+ main)
