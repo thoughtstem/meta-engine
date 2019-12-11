@@ -1,5 +1,5 @@
 #lang racket
 
-(require meta-engine/core/main)
+(require meta-engine/core/base)
 
 (module+ main)
