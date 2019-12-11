@@ -1,5 +1,5 @@
 #lang racket
 
-(require mode-lambda/static )
+(require lux/chaos/gui/key)
 
 (module+ main)
