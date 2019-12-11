@@ -1,5 +1,5 @@
 #lang racket
 
-(require meta-engine/sprites/main)
+(require meta-engine/extensions/sprites/main)
 
 (module+ main)
