@@ -1,5 +1,5 @@
 #lang racket
 
-(require lux/chaos/gui/key)
+(require lux/chaos/gui/mouse)
 
 (module+ main)
