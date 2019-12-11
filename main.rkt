@@ -1,5 +1,5 @@
 #lang racket
 
-(require meta-engine/extensions/ui/main)
+(require meta-engine)
 
 (module+ main)

@@ -5,8 +5,7 @@
 (require "../../core/main.rkt")
 (require "../rendering/renderer.rkt")
 (require "../rendering/animated-sprite.rkt")
-(require 2htdp/image
-         (only-in racket/draw make-font))
+(require 2htdp/image)
 
 (define-syntax-rule (image-generator name img)
   (begin
@@ -41,6 +40,7 @@
               ;#:mode        [mode 'normal]
               ;#:delay       [delay 20]
               )
+  (define make-font (dynamic-require 'racket/draw 'make-font))
   (define new-font (make-font #:size   f-size
                               #:face   f-face
                               #:family f-family
