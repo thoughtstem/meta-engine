@@ -49,9 +49,8 @@
 
 (require "../../core/main.rkt"
          "../common-components/main.rkt"
-         (only-in 2htdp/image bitmap/file image->color-list crop image-width image-height text/font)
-         
-         )
+         (only-in 2htdp/image bitmap/file image->color-list crop image-width image-height text/font))
+
 ; ==== IMAGE SPRITE ====
 (struct image-sprite (id width height))
 

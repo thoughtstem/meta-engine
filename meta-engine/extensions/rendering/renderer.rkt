@@ -6,8 +6,7 @@
          register-fonts!
          get-sprite-width
          get-sprite-height
-         init-db
-         )
+         init-db)
 
 (require racket/match
          racket/fixnum
@@ -17,8 +16,10 @@
          (prefix-in ml: mode-lambda)
          (prefix-in ml: mode-lambda/static)
          (prefix-in gl: mode-lambda/backend/gl)
+
          (prefix-in ml: mode-lambda/text/runtime)
-         (prefix-in ml: mode-lambda/text/static)
+         ;Don't include this here.  It causes racket/gui/base to be included -- which causes Travis to break due to not having a display (No display :0 error).
+         ;(prefix-in ml: mode-lambda/text/static)
          lux/chaos/gui/key
          lux/chaos/gui/mouse)
 
@@ -194,10 +195,9 @@
   (for ([i to-compile])
     (add-sprite! sd (first i) (second i)))
 
-  #;
-  (flush-queued-sprites!)
-
   (set! recompiled #t)
+
+  (define ml:load-font! (dynamic-require 'mode-lambda/text/static 'load-font!))
 
   ; set the mode lambda font
   (set! game-fonts

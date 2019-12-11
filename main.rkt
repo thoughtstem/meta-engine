@@ -1,5 +1,5 @@
 #lang racket
 
-(require lux/chaos/gui/mouse)
+(require meta-engine)
 
 (module+ main)
