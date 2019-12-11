@@ -1,5 +1,5 @@
 #lang racket
 
-(require racket/draw)
+(require meta-engine/extensions/physics/main)
 
 (module+ main)
