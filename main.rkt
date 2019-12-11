@@ -1,5 +1,5 @@
 #lang racket
 
-(require mode-lambda)
+(require lux)
 
 (module+ main)
