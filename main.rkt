@@ -1,5 +1,5 @@
 #lang racket
 
-(require mode-lambda/backend/gl )
+(require mode-lambda/text/runtime )
 
 (module+ main)
