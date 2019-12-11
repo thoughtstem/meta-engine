@@ -1,5 +1,5 @@
 #lang racket
 
-(require meta-engine/extensions/physics/main)
+(require meta-engine/extensions/rendering/main)
 
 (module+ main)
