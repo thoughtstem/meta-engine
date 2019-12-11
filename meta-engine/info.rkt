@@ -1,5 +1,7 @@
 #lang info
 
+(define collection "meta-engine")
+
 (define scribblings '(("scribblings/main.scrbl" (multi-page))))
 
 (define deps  '("jack-posn"
