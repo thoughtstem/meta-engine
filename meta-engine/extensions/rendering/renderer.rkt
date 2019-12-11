@@ -21,7 +21,8 @@
          ;Don't include this here.  It causes racket/gui/base to be included -- which causes Travis to break due to not having a display (No display :0 error).
          ;(prefix-in ml: mode-lambda/text/static)
          lux/chaos/gui/key
-         lux/chaos/gui/mouse)
+         lux/chaos/gui/mouse
+         )
 
 (require "../../core/main.rkt"
          "../common-components/main.rkt" 
