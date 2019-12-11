@@ -1,5 +1,5 @@
 #lang racket
 
-(require meta-engine/core/base)
+(require mode-lambda)
 
 (module+ main)
