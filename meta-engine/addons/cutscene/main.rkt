@@ -54,7 +54,8 @@
     (if (entity? s)
         s
         (entity
-         (relative-position pos)
+         (relative-position pos (cond [(eq? mode 'still) (get-local-position)]
+                                      [(eq? mode 'scroll-right) (posn-add (posn 1 0) (get-local-position))]))
          (if (list? s)
              s
              (sprite s)))))
@@ -80,7 +81,8 @@
    (if rp
        (relative-position rp)
        (list (position (or p (posn 0 0))
-                       (or p (go-to-pos 'center)))
+                       (or p (go-to-pos 'center))
+                       )
              (position-hack #t)))
    (counter 0 (^ (curry + (get-game-delta-time))))
    (duration dur)
