@@ -54,8 +54,16 @@
     (if (entity? s)
         s
         (entity
-         (relative-position pos (cond [(eq? mode 'still) (get-local-position)]
-                                      [(eq? mode 'scroll-right) (posn-add (posn 1 0) (get-local-position))]))
+         (direction (cond [(eq? mode 'still) 0]
+                          [(eq? mode 'scroll-right-from-center) 0]
+                          [(eq? mode 'scroll-left-from-center)  180]
+                          [(eq? mode 'scroll-down-from-center)  90]
+                          [(eq? mode 'scroll-up-from-center)    270]
+                          ))
+         (speed (if (eq? mode 'still)
+                    0
+                    100))
+         (relative-position pos (get-relative-movement-vector))
          (if (list? s)
              s
              (sprite s)))))

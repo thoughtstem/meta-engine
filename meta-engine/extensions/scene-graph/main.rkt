@@ -25,11 +25,16 @@
          propagate-to-child-parent-data
 
          entity->parent
+
+         get-relative-movement-vector
          )
 
 (require "../../core/main.rkt")
 (require "../common-components/name.rkt")
 (require "../common-components/position-rotation-size.rkt")
+(require "../common-components/time.rkt")
+(require "../common-components/direction.rkt")
+(require "../common-components/speed.rkt")
 (require "../rendering/main.rkt")
 (require syntax/parse/define)
 
@@ -168,5 +173,12 @@
                         (list (relative-rotation 0)
                               (relative-size 1)
                               (relative-position (posn 0 0)))))
+
+(define (get-relative-movement-vector)
+  (define capped-dt (min (get-game-delta-time) (/ 1 30.0)))
+  (posn-add (get-local-position)
+            (posn-multiply (posn capped-dt capped-dt)
+                           (posn-rotate-origin-ccw (modulo (get-direction) 360)
+                                    (posn (get-speed) 0)))))
 
 
