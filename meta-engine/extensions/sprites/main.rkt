@@ -36,6 +36,7 @@
               #:font-style  [f-style  'normal]
               #:font-weight [f-weight 'normal]
               #:color       [color 'yellow]
+              #:underlined? [underlined? #f]
               ;#:blink-color [b-color 'red]
               ;#:mode        [mode 'normal]
               ;#:delay       [delay 20]
@@ -45,7 +46,8 @@
                               #:face   f-face
                               #:family f-family
                               #:style  f-style
-                              #:weight f-weight))
+                              #:weight f-weight
+                              #:underlined? underlined?))
   (register-fonts! new-font)
   (text-sprite str #:scale scale #:font new-font #:color color))
 
