@@ -103,7 +103,11 @@
                 ))
    (apply children (append (list (delta-time-entity))
                            offset-items-list                      
-                           (list (bordered-box w h #:relative-position (posn 0 0) #:color bg-color #:border-color border-color))))))
+                           (list (if bg-sprite
+                                     (entity bg-sprite)
+                                     (bordered-box w h #:relative-position (posn 0 0) #:color bg-color #:border-color border-color))
+                                 
+                                 )))))
 ; ===== END OF PAGE ENTITY =====
 
 ; ===== CUTSCENE / MULTI-PAGE ENTITY =====
