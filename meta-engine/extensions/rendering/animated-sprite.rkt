@@ -243,22 +243,27 @@
   (set! insertion-queue '()))
 
 
-(define (sheet->list i #:row (r 0))
+(define (sheet->list i #:row  [r 0]
+                       #:rows [rows 4]
+                       #:cols [cols 4])
   (define ew (image-width i))
   (define eh (image-height i))
-
-  (define rows 4)
-  (define cols 4)
 
   (define cw  (/ ew cols))
   (define ch  (/ eh rows))
 
-  (define elf1 (register-sprite (crop (* cw 0) (* ch r) cw ch i)))
-  (define elf2 (register-sprite (crop (* cw 1) (* ch r) cw ch i)))
-  (define elf3 (register-sprite (crop (* cw 2) (* ch r) cw ch i)))
-  (define elf4 (register-sprite (crop (* cw 3) (* ch r) cw ch i)))
+  (define nums (build-list cols values))
 
-  (define elves (list elf1 elf2 elf3 elf4))
+  (define (cropping col)
+    (register-sprite (crop (* cw col) (* ch r) cw ch i)))
+
+  (define elves (map cropping nums))
+
+  ;(define elf1 (register-sprite (crop (* cw 0) (* ch r) cw ch i)))
+  ;(define elf2 (register-sprite (crop (* cw 1) (* ch r) cw ch i)))
+  ;(define elf3 (register-sprite (crop (* cw 2) (* ch r) cw ch i)))
+  ;(define elf4 (register-sprite (crop (* cw 3) (* ch r) cw ch i)))
+  ;(define elves (list elf1 elf2 elf3 elf4))
 
   elves)
 
