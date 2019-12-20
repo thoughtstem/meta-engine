@@ -29,18 +29,19 @@
 
 ; ==== TEXT SPRITES ====
 (define (make-text str
-              #:scale       [scale 1]
-              #:font-size   [f-size 13]
-              #:font-face   [f-face MONOSPACE-FONT-FACE]
-              #:font-family [f-family 'modern]
-              #:font-style  [f-style  'normal]
-              #:font-weight [f-weight 'normal]
-              #:color       [color 'yellow]
-              #:underlined? [underlined? #f]
-              ;#:blink-color [b-color 'red]
-              ;#:mode        [mode 'normal]
-              ;#:delay       [delay 20]
-              )
+                   #:scale       [scale 1]
+                   #:font-size   [f-size 13]
+                   #:font-face   [f-face MONOSPACE-FONT-FACE]
+                   #:font-family [f-family 'modern]
+                   #:font-style  [f-style  'normal]
+                   #:font-weight [f-weight 'normal]
+                   #:color       [color 'yellow]
+                   #:underlined? [underlined? #f]
+                   ;#:blink-color [b-color 'red]
+                   ;#:mode        [mode 'normal]
+                   ;#:delay       [delay 20]
+                   ;". str" todo make it work with a list
+                   )
   (define make-font (dynamic-require 'racket/draw 'make-font))
   (define new-font (make-font #:size   f-size
                               #:face   f-face
@@ -49,5 +50,10 @@
                               #:weight f-weight
                               #:underlined? underlined?))
   (register-fonts! new-font)
-  (text-sprite str #:scale scale #:font new-font #:color color))
+  
+  ;(define (create-sprite str)
+  ;  (text-sprite str #:scale scale #:font new-font #:color color))
+  ;(map create-sprite str)
+  (text-sprite str #:scale scale #:font new-font #:color color)
+  )
 
