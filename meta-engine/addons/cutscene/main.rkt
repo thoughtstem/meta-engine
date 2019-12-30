@@ -34,6 +34,7 @@
               #:duration     [dur #f]
               #:line-padding [line-padding 4]
               #:mode         [mode 'still]
+              #:scroll-speed [spd 100]
               . items)
   
   (define bg-sprite (if bg
@@ -55,14 +56,18 @@
         s
         (entity
          (direction (cond [(eq? mode 'still) 0]
-                          [(eq? mode 'scroll-right-from-center) 0]
-                          [(eq? mode 'scroll-left-from-center)  180]
-                          [(eq? mode 'scroll-down-from-center)  90]
-                          [(eq? mode 'scroll-up-from-center)    270]
+                          [(eq? mode 'scroll-right)       0]
+                          [(eq? mode 'scroll-down-right) 45]
+                          [(eq? mode 'scroll-down)       90]
+                          [(eq? mode 'scroll-down-left) 135]
+                          [(eq? mode 'scroll-left)      180]
+                          [(eq? mode 'scroll-up-left)   225]
+                          [(eq? mode 'scroll-up)        270]
+                          [(eq? mode 'scroll-up-right)  315]
                           ))
          (speed (if (eq? mode 'still)
                     0
-                    100))
+                    spd))
          (relative-position pos (get-relative-movement-vector))
          (if (list? s)
              s

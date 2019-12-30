@@ -212,6 +212,7 @@
                                             #:family (font-family f)
                                             #:style  (font-style f)
                                             #:weight (font-weight f)
+                                            #:underlined? (font-underline? f)
                                             ;#:smoothing 'unsmoothed
                                             )]))
              game-fonts))
@@ -306,6 +307,7 @@
           (send f get-family)
           (send f get-style)
           (send f get-weight)
+          (send f get-underlined)
           #f
           #f))
   
@@ -322,34 +324,38 @@
        (set! should-recompile? #t)
        ))
 
-(struct font (size face family style weight ml:font renderer) #:transparent)
+(struct font (size face family style weight underline? ml:font renderer) #:transparent)
 
 (define game-fonts
   (list (font 13.0 MONOSPACE-FONT-FACE
               'modern 'normal 'normal
               #f
+              #f
               #f)))
 
 (define (font-eq? f1 f2)
-    (define f1-size   (send f1 get-size))
-    (define f1-face   (send f1 get-face))
-    (define f1-family (send f1 get-family))
-    (define f1-style  (send f1 get-style))
-    (define f1-weight (send f1 get-weight))
+  (define f1-size   (send f1 get-size))
+  (define f1-face   (send f1 get-face))
+  (define f1-family (send f1 get-family))
+  (define f1-style  (send f1 get-style))
+  (define f1-weight (send f1 get-weight))
+  (define f1-underline? (send f1 get-underlined))
 
     
-    (define f2-size   (font-size f2))
-    (define f2-face   (font-face f2))
-    (define f2-family (font-family f2))
-    (define f2-style  (font-style f2))
-    (define f2-weight (font-weight f2))
+  (define f2-size   (font-size f2))
+  (define f2-face   (font-face f2))
+  (define f2-family (font-family f2))
+  (define f2-style  (font-style f2))
+  (define f2-weight (font-weight f2))
+  (define f2-underline? (font-underline? f2))
     
-    (and (= f1-size f2-size)
-         (equal? f1-face f2-face)
-         (eq? f1-family f2-family)
-         (eq? f1-style f2-style)
-         (eq? f1-weight f2-weight)
-         ))
+  (and (= f1-size f2-size)
+       (equal? f1-face f2-face)
+       (eq? f1-family f2-family)
+       (eq? f1-style f2-style)
+       (eq? f1-weight f2-weight)
+       (eq? f1-underline? f2-underline?)
+       ))
 
 (define (text-sprite->ml:sprite ts e)
   ;(define get-backing-scale (dynamic-require 'racket/gui/base 'get-display-backing-scale))
