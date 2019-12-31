@@ -64,6 +64,7 @@
                           [(eq? mode 'scroll-up-left)   225]
                           [(eq? mode 'scroll-up)        270]
                           [(eq? mode 'scroll-up-right)  315]
+                          [else mode]
                           ))
          (speed (if (eq? mode 'still)
                     0
