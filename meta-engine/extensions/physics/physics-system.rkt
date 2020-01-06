@@ -409,7 +409,6 @@
     1)
 
   (define (postsolve-callback arbiter space data)
-    
     1)
 
   (define handler (chip:cpSpaceAddDefaultCollisionHandler space))

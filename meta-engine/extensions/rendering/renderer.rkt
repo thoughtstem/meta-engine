@@ -228,6 +228,13 @@
   
   csd)
 
+(define (maybe-init-db)
+  (when (or new-sprites-added should-recompile?)
+    (set! should-recompile? #f)
+    (displayln "Recompiling sprite db")
+    (init-db) ;Try reinitializing the database, pulling from the sprite queue again
+    ))
+
 (define (play! #:width (W 400) 
                #:height (H 400)
                g)
@@ -270,9 +277,11 @@
 
   (define ml:render #f)
 
-  (init-db) ;Initializes csd
+  ;(init-db) ;Initializes csd
 
   (define (render-game g)
+    (maybe-init-db)
+
     (set! ml:render 
       (if recompiled
         (begin
@@ -408,11 +417,7 @@
     (when (and s (get-value s))
       (define eid (entity-id e))
 
-      (when (or new-sprites-added should-recompile?)
-        (set! should-recompile? #f)
-        (displayln "Recompiling sprite db")
-        (init-db) ;Try reinitializing the database, pulling from the sprite queue again
-        )
+      (maybe-init-db)
 
       (define s-val (call-if-proc (get-sprite s)))
       
