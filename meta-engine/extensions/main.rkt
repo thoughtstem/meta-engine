@@ -17,8 +17,7 @@
     "threading-util.rkt"
     "do-once/main.rkt"
     "ui/main.rkt"
-    
-    ))
+    "hotswap/main.rkt"))
 
 
 (require
@@ -37,5 +36,4 @@
   "threading-util.rkt"
   "do-once/main.rkt"
   "ui/main.rkt"
-
-  )
+  "hotswap/main.rkt")

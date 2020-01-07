@@ -13,7 +13,7 @@
 
 ;How can I get control back from an arbitrary point?
 ;   Raise a special exception and catch it at the top, dumping certain things...
-;   That seems pretty fucking good actually...
+;   That seems pretty good actually...
 ;     (debug ...) can contain the catching logic
 ;   All the (debug:* ...) can do the throwing
 
@@ -80,8 +80,7 @@
 
 (define-debug-hook (debug:entity-tick-begin e)
       (blue-display "****ENTITY TICK BEGIN****")
-      (pretty-print-entity e)  
-      )
+      (pretty-print-entity e))
 
 
 (define-debug-hook (debug:component-tick-begin c)

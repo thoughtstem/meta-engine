@@ -4,7 +4,8 @@
          page
          current-page get-current-page set-current-page
          current-page-time
-         duration get-duration set-duration)
+         duration get-duration set-duration
+         do-logs?)
 
 (require "../../extensions/main.rkt")
 
@@ -23,6 +24,12 @@
 (define-component position-hack boolean?)
 (define-component duration (or/c #f number?))
 
+(define do-logs? (make-parameter #f))
+
+(define (log m)
+  (when (do-logs?)
+    (displayln m)))
+
 ; ===== PAGE ENTITY =====
 (define (page #:width        [w #f]
               #:height       [h #f]
@@ -36,10 +43,14 @@
               #:mode         [mode 'still]
               #:scroll-speed [spd 100]
               . items)
+
+  (log "Creating page")
   
   (define bg-sprite (if bg
                         (ensure-sprite bg)
                         #f))
+
+  (log "  Checking pages")
 
   (define sprite-component-list (map ensure-sprite items)) ;inlcudes animation-system (list?) and entity
 
@@ -48,8 +59,12 @@
         s
         (get-sprite s)))
 
+  (log "  Making sprite list")
+
   (define sprite-list (map get-sprite-or-animation
                            sprite-component-list))
+
+
   
   (define (make-line pos s)
     (if (entity? s)
@@ -91,6 +106,19 @@
                                        half-height-item
                                        (- half-of-total))) item)))))
 
+  (log "  Making page children")
+
+  (define cs
+    (apply children (append (list (delta-time-entity))
+                            offset-items-list                      
+                            (list (if bg-sprite
+                                    (entity bg-sprite)
+                                    (bordered-box w h #:relative-position (posn 0 0) #:color bg-color #:border-color border-color))
+
+                                  ))))
+
+  (log "  Making full page")
+
   (parent
    (if rp
        (relative-position rp)
@@ -105,15 +133,10 @@
                    (on-key 'q (despawn))
                    (if dur
                        (on-rule (>= (get-counter) dur) (despawn))
-                       (get-death))
-                ))
-   (apply children (append (list (delta-time-entity))
-                           offset-items-list                      
-                           (list (if bg-sprite
-                                     (entity bg-sprite)
-                                     (bordered-box w h #:relative-position (posn 0 0) #:color bg-color #:border-color border-color))
-                                 
-                                 )))))
+                       (get-death))))
+
+   cs))
+
 ; ===== END OF PAGE ENTITY =====
 
 ; ===== CUTSCENE / MULTI-PAGE ENTITY =====
