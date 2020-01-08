@@ -6,6 +6,7 @@
 @title{meta-engine v2}
 @author{thoughtstem}
 
+@(include-section "quickstart.scrbl")
 @(include-section "core/main.scrbl")
 @(include-section "hotswap.scrbl")
 
