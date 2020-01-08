@@ -7,6 +7,7 @@
 @author{thoughtstem}
 
 @(include-section "core/main.scrbl")
+@(include-section "hotswap.scrbl")
 
 @section{Experimental}
 
