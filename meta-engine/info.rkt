@@ -10,6 +10,8 @@
 		"mode-lambda"
 		"threading"
 		"https://github.com/thoughtstem/racket-chipmunk.git"
+                ;added ts-kata-util to define/contract/doc some funcs
+                "https://github.com/thoughtstem/TS-GE-Katas.git?path=ts-kata-util"
                 "base"
                 "jack-ease"
                 "image-coloring"))

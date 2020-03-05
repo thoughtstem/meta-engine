@@ -1,7 +1,7 @@
-#lang racket
+#lang at-exp racket
 
 (provide (rename-out (make-cutscene cutscene))
-         page
+         ;page
          current-page get-current-page set-current-page
          current-page-time
          duration get-duration set-duration
@@ -9,7 +9,8 @@
 
 (require "../../extensions/main.rkt")
 
-(require 2htdp/image)
+(require 2htdp/image
+         ts-kata-util)
 
 (define (ensure-sprite thing) ;or list or entity
     (cond [(string? thing) (sprite (make-text thing #:font-size 16))]
@@ -31,19 +32,36 @@
     (displayln m)))
 
 ; ===== PAGE ENTITY =====
-(define (page #:width        [w #f]
-              #:height       [h #f]
-              #:position     [p #f]
-              #:relative-position [rp #f]
-              #:bg           [bg #f]
-              #:bg-color     [bg-color (color 50 50 50)]
-              #:border-color [border-color 'white]
-              #:duration     [dur #f]
-              #:line-padding [line-padding 4]
-              #:mode         [mode 'still]
-              #:scroll-speed [spd 100]
-              . items)
+(define/contract/doc (page #:width        [w #f]
+                           #:height       [h #f]
+                           #:position     [p #f]
+                           #:relative-position [rp #f]
+                           #:bg           [bg #f]
+                           #:bg-color     [bg-color (color 50 50 50)]
+                           #:border-color [border-color 'white]
+                           #:duration     [dur #f]
+                           #:line-padding [line-padding 4]
+                           #:mode         [mode 'still]
+                           #:scroll-speed [spd 100]
+                           . items)
 
+   (->i ()
+        (#:width             [w (or/c positive? boolean?)]
+         #:height            [h (or/c positive? boolean?)]
+         #:position          [p any/c]
+         #:relative-position [rp any/c]
+         #:bg                [bg any/c]
+         #:bg-color          [bg-color (or/c symbol? object? string?)]
+         #:border-color      [border-color (or/c symbol? object? string?)]
+         #:duration          [dur (or/c positive? boolean?)]
+         #:line-padding      [line-padding positive?]
+         #:mode              [mode symbol?]
+         #:scroll-speed      [spd positive?])
+         #:rest              [items any/c]
+        [returns any/c])
+
+    @{Function to create pages.}
+  
   (log "Creating page")
   
   (define bg-sprite (if bg
