@@ -1,11 +1,12 @@
-#lang racket
+#lang at-exp racket
 
-(provide make-text)
+;(provide make-text)
 
 (require "../../core/main.rkt")
 (require "../rendering/renderer.rkt")
 (require "../rendering/animated-sprite.rkt")
-(require 2htdp/image)
+(require 2htdp/image
+         ts-kata-util)
 
 (define-syntax-rule (image-generator name img)
   (begin
@@ -28,20 +29,35 @@
                    (square 5 'solid 'red)))
 
 ; ==== TEXT SPRITES ====
-(define (make-text str
-                   #:scale       [scale 1]
-                   #:font-size   [f-size 13]
-                   #:font-face   [f-face MONOSPACE-FONT-FACE]
-                   #:font-family [f-family 'modern]
-                   #:font-style  [f-style  'normal]
-                   #:font-weight [f-weight 'normal]
-                   #:color       [color 'yellow]
-                   #:underlined? [underlined? #f]
-                   ;#:blink-color [b-color 'red]
-                   ;#:mode        [mode 'normal]
-                   ;#:delay       [delay 20]
-                   ;". str" todo make it work with a list
-                   )
+(define/contract/doc (make-text [str "META-TEXT"]
+                                #:scale       [scale 1]
+                                #:font-size   [f-size 13]
+                                #:font-face   [f-face MONOSPACE-FONT-FACE]
+                                #:font-family [f-family 'modern]
+                                #:font-style  [f-style  'normal]
+                                #:font-weight [f-weight 'normal]
+                                #:color       [color 'yellow]
+                                #:underlined? [underlined? #f]
+                                ;#:blink-color [b-color 'red]
+                                ;#:mode        [mode 'normal]
+                                ;#:delay       [delay 20]
+                                ;". str" todo make it work with a list
+                                )
+
+  (->i ()
+       ([str string?]
+        #:scale       [scale number?]
+        #:font-size   [f-size number?]
+        #:font-face   [f-face any/c]
+        #:font-family [f-family symbol?]
+        #:font-style  [f-style  symbol?]
+        #:font-weight [f-weight symbol?]
+        #:color       [color (or/c symbol? object? string?)]
+        #:underlined? [underlined? boolean?])
+  [returns any/c])
+
+ @{Function to make text.}
+  
   (define make-font (dynamic-require 'racket/draw 'make-font))
   (define new-font (make-font #:size   f-size
                               #:face   f-face
